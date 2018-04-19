@@ -272,7 +272,7 @@ spikeTime = [4.26488
 
 
 % convert to index
-spikeTimeIdx = round(spikeTime*fps)
+spikeTimeIdx = round(spikeTime*fps-9.1228)
 
 if (max(spikeTimeIdx) > T)
     warning('Maximum spike time exceeds recoding time. Check!!!')
@@ -284,7 +284,7 @@ end
 %%  calc STA
 
 % Step 1. find stimulus pattern that triggers a spike
-W = 1*fps;    % window size 
+W = 0.5*fps;    % window size 
 stimTriggeredSpike = [];
 cnt = 1;
 
@@ -318,14 +318,17 @@ xlabel('x')
 ylabel('y')
 title('variance across time')
 
+%axis xy
 
 % plot STA for the pixel with the largest variance
 [mm, maxIdx] = max(STAvar)
 subplot(224)
-plot(STAstack(maxIdx,:))
+plot(STAstack(maxIdx,:)-mean(STAstack(maxIdx,:)))
 xlabel('t')
 ylabel('STA')
 title('STA for the pixel with the largest variance')
+xaxis=(-W+1:0)/fps
+set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
 
 
 set(gcf, 'paperposition', [0 0 9 8])
