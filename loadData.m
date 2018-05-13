@@ -21,16 +21,6 @@ for i = 1:N
     % save to txt file
     save([folderName channelName '.txt'], channelName, '-ascii')
     
-    %save(
-%     if strcmp(fileName,'A1a.mat') % stim timing info
-%         
-% 
-%         load([folderName fileName])
-%     else
-%         disp(sprintf('Loading %s', fileName))
-%         load([folderName fileName])
-%     end
-
 end
 
 
