@@ -41,19 +41,19 @@ load(StimInfoFileName)
 T = length(StimInfo);
 
 stim = cell2mat(StimInfo);
-stim = reshape(stim, [T, height, width]);
+%stim = reshape(stim, [T, height, width]);
 % rearrange order
-stim = permute(stim, [2 3 1]);
+%stim = permute(stim, [2 3 1]);
 size(stim)
 
 % plot some sample stimulus
 clf
 subplot(131)
-imshow(stim(:,:,1))
+imshow(reshape(stim(1,:),[height, width]))
 subplot(132)
-imshow(stim(:,:,2))
+imshow(reshape(stim(2,:),[height, width]))
 subplot(133)
-imshow(stim(:,:,3))
+imshow(reshape(stim(3,:),[height, width]))
 
 
 

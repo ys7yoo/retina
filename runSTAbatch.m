@@ -13,24 +13,22 @@ for i=1:length(channelNames)
     channelName = channelNames{i}
     spikeTime=eval(channelName);
 
-    %% call STA here
-    W = 0.5*fps;    % window size 
-    %W = 0.2*fps;    % window size 
-    STA = calcSTA(stim, spikeTime-A1a(1), fps, W);
+    % choose spike during the stim only!
+    W = 0.5 % Window in sec
+    [STA, gridT] = calcSTAintp(stim, A1a, spikeTime, W, fps);
 
 
 
     %% plot STA
-    STAstack = reshape(STA,[height*width, W]);
     clf
     subplot(121)
-    imshow(STAstack)
+    imshow(STA')
     xlabel('t')
     ylabel('pixel')
     title('STA')
 
     % check variance to see if there is any change 
-    STAvar = var(STAstack,[],2);
+    STAvar = var(STA,[],1);
     subplot(222)
     imshow(reshape(STAvar,height,width),[])
     xlabel('x')
@@ -48,13 +46,15 @@ for i=1:length(channelNames)
     % plot STA for the pixel with the largest variance
 
     subplot(224)
-    plot(STAstack(maxIdx,:)-mean(STAstack(maxIdx,:)))
+    plot(gridT, STA(:,maxIdx)-mean(STA(:,maxIdx)))
+    hold on
+    plot(gridT([1,end]),[0 0], ':k') % plot mean as reference
     xlabel('t')
     ylabel('STA')
     title('STA for the pixel with the largest variance')
-    xaxis=(-W+1:0)/fps;
-    set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
-
+    %xaxis=(-W+1:0)/fps;
+    %set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
+    box off
 
     set(gcf, 'paperposition', [0 0 9 8])
     set(gcf, 'papersize', [9 8])
