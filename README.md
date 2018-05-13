@@ -7,7 +7,7 @@ retina project (collaboration with CBNU College of Medicine)
 * calcSTA.m - core function to calc STA
 
 
-## How to run 
+## How to run STA
 1. Setup expriment number and foldernames in `loadData.m`.
 2. Run `runSTAbatch.m` to calc STA for all the channels.
 
