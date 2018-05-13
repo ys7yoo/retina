@@ -2,7 +2,7 @@
 %% Choose experiment to load
 clear
 
-NUM_EXP = 1
+NUM_EXP = 3
 
 switch NUM_EXP
     case 1        
@@ -62,11 +62,15 @@ imshow(stim(:,:,3))
 matFiles = dir([SpikeTrainFolderName '*.mat']);
 matFiles = {matFiles.name};
 
+cnt = 1;
 for i = 1:length(matFiles)
     
     fileName = matFiles{i};    
-    channelName = fileName(1:end-4);
-    channelNames{i} = channelName;    % save channel names 
+    channelName = fileName(1:end-4);  % remove '.mat'
+    if ~strcmp(channelName, 'A1a')
+        channelNames{cnt} = channelName;    % save channel names (except A1a)
+        cnt = cnt + 1;  % number of found channels
+    end
     
     fprintf('Loading %s\n', fileName)
     load([SpikeTrainFolderName fileName])
