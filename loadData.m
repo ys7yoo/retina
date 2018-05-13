@@ -15,7 +15,7 @@ for i = 1:N
     fileName = matFiles{i};    
     channelName = fileName(1:end-4);
     
-    disp(sprintf('Loading %s', fileName))
+    fprintf('Loading %s\n', fileName)
     load([folderName fileName])
     
     % save to txt file
