@@ -14,7 +14,7 @@ for i=1:length(channelNames)
     spikeTime=eval(channelName);
 
     % choose spike during the stim only!
-    W = 0.5 % Window in sec
+    W = 0.5; % Window in sec
     [STA, gridT] = calcSTAintp(stim, A1a, spikeTime, W, fps);
 
 
@@ -27,33 +27,44 @@ for i=1:length(channelNames)
     ylabel('pixel')
     title('STA')
 
-    % check variance to see if there is any change 
-    STAvar = var(STA,[],1);
-    subplot(222)
-    imshow(reshape(STAvar,height,width),[])
-    xlabel('x')
-    ylabel('y')
-    title('variance across time')
+    STAmean = mean(STA,1);
+    subplot(322)
+    imshow(reshape(STAmean,height,width)',[])   % stim is rotate 90 degree!
+    xlabel('y') %xlabel('x')         % swap x and y
+    ylabel('x') %ylabel('y')
+    title(sprintf('mean STA across time'))
+    axis on xy
+    
 
     % mark the pixel with largest variance 
-    [mm, maxIdx] = max(STAvar);
-    [XX,YY]= meshgrid(1:13);
+    [XX,YY]= meshgrid(1:height);  % grid for ploting
+    [mm, maxIdx] = max(STAmean);
 
     hold on;
-    plot(XX(maxIdx),YY(maxIdx),'+r')
-    %axis xy
+    %plot(XX(maxIdx),YY(maxIdx),'+r', 'markersize', 8, 'linewidth', 2)
+    plot(YY(maxIdx),XX(maxIdx),'+r', 'markersize', 8, 'linewidth', 2)
+    
+    [mm, minIdx] = min(STAmean);
+    [XX,YY]= meshgrid(1:height);
 
-    % plot STA for the pixel with the largest variance
-
-    subplot(224)
-    plot(gridT, STA(:,maxIdx)-mean(STA(:,maxIdx)))
-    hold on
-    plot(gridT([1,end]),[0 0], ':k') % plot mean as reference
+    hold on;
+    %plot(XX(minIdx),YY(minIdx),'xb', 'markersize', 8, 'linewidth',4)
+    plot(YY(minIdx),XX(minIdx),'xb', 'markersize', 8, 'linewidth',4)
+    
+    
+    
+    subplot(324)
+    plot(gridT, STA(:,maxIdx),'r')
     xlabel('t')
     ylabel('STA')
     title('STA for the pixel with the largest variance')
-    %xaxis=(-W+1:0)/fps;
-    %set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
+    box off
+    
+    subplot(326)
+    plot(gridT, STA(:,minIdx),'b')
+    xlabel('t')
+    ylabel('STA')
+    title('STA for the pixel with the largest variance')
     box off
 
     set(gcf, 'paperposition', [0 0 9 8])

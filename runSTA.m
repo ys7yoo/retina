@@ -9,14 +9,17 @@ loadData
 
 %% choose one channel from channelNames (MANUAL for now)
 disp(channelNames)
-%channelName = 'ch_47b'
-channelName = 'ch_48a'
+channelName = 'ch_47b'
+%channelName = 'ch_48a'
+%channelName = 'ch_65b'
+%channelName = 'ch_66a'
+%channelName = 'ch_66b'
 spikeTime=eval(channelName)
 
 %% call here
 
 % choose spike during the stim only!
-W = 0.5 % Window in sec
+W = 0.5; % Window in sec
 [STA, gridT] = calcSTAintp(stim, A1a, spikeTime, W, fps);
 
 
@@ -37,35 +40,94 @@ xlabel('t')
 ylabel('pixel')
 title('STA')
 
-% check variance to see if there is any change 
-STAvar = var(STA,[],1);
-subplot(222)
-imshow(reshape(STAvar,height,width),[])
-xlabel('x')
-ylabel('y')
-title('variance across time')
+STAmean = mean(STA,1);
+subplot(322)
+imshow(reshape(STAmean,height,width)',[])   % stim is rotate 90 degree!
+xlabel('y') %xlabel('x')         % swap x and y
+ylabel('x') %ylabel('y')
+title(sprintf('mean STA across time'))
+axis on xy
+
 
 % mark the pixel with largest variance 
-[mm, maxIdx] = max(STAvar);
-[XX,YY]= meshgrid(1:13);
+[XX,YY]= meshgrid(1:height);  % grid for ploting
+[mm, maxIdx] = max(STAmean);
 
 hold on;
-plot(XX(maxIdx),YY(maxIdx),'+r')
-%axis xy
+%plot(XX(maxIdx),YY(maxIdx),'+r', 'markersize', 8, 'linewidth', 2)
+plot(YY(maxIdx),XX(maxIdx),'+r', 'markersize', 8, 'linewidth', 2)
 
-% plot STA for the pixel with the largest variance
+[mm, minIdx] = min(STAmean);
+[XX,YY]= meshgrid(1:height);
 
-subplot(224)
-plot(gridT, STA(:,maxIdx)-mean(STA(:,maxIdx)))
-hold on
-plot(gridT([1,end]),[0 0], ':k') % plot mean as reference
+hold on;
+%plot(XX(minIdx),YY(minIdx),'xb', 'markersize', 8, 'linewidth',4)
+plot(YY(minIdx),XX(minIdx),'xb', 'markersize', 8, 'linewidth',4)
+
+
+
+subplot(324)
+plot(gridT, STA(:,maxIdx),'r')
 xlabel('t')
 ylabel('STA')
 title('STA for the pixel with the largest variance')
-%xaxis=(-W+1:0)/fps;
-%set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
 box off
 
-set(gcf, 'paperposition', [0 0 9 8])
-set(gcf, 'papersize', [9 8])
-saveas(gcf, sprintf('Num%d/STA_%s.pdf',NUM_EXP,channelName))
+subplot(326)
+plot(gridT, STA(:,minIdx),'b')
+xlabel('t')
+ylabel('STA')
+title('STA for the pixel with the largest variance')
+box off
+    
+    saveas(gcf, sprintf('Num%d_STA_%s.pdf',NUM_EXP,channelName))
+    
+    
+% % %% plot STA
+% % clf
+% % subplot(121)
+% % imshow(STA')
+% % xlabel('t')
+% % ylabel('pixel')
+% % title('STA')
+% % 
+% % STAmean = mean(STA,1);
+% % subplot(322)
+% % imshow(reshape(STAmean,height,width),[])
+% % xlabel('x')
+% % ylabel('y')
+% % title(sprintf('mean across time %.2f',mean(STAmean)))
+% % 
+% % 
+% % % check variance to see if there is any change 
+% % STAvar = var(STA,[],1);
+% % subplot(324)
+% % imshow(reshape(STAvar,height,width),[])
+% % xlabel('x')
+% % ylabel('y')
+% % title('variance across time')
+% % 
+% % % mark the pixel with largest variance 
+% % [mm, maxIdx] = max(STAvar);
+% % [XX,YY]= meshgrid(1:13);
+% % 
+% % hold on;
+% % plot(XX(maxIdx),YY(maxIdx),'+r')
+% % %axis xy
+% % 
+% % % plot STA for the pixel with the largest variance
+% % 
+% % subplot(326)
+% % plot(gridT, STA(:,maxIdx)-mean(STA(:,maxIdx)))
+% % hold on
+% % plot(gridT([1,end]),[0 0], ':k') % plot mean as reference
+% % xlabel('t')
+% % ylabel('STA')
+% % title('STA for the pixel with the largest variance')
+% % %xaxis=(-W+1:0)/fps;
+% % %set(gca,'xticklabel',(W-1*get(gca,'xtick'))/fps)
+% % box off
+% % 
+% % set(gcf, 'paperposition', [0 0 9 8])
+% % set(gcf, 'papersize', [9 8])
+% % saveas(gcf, sprintf('Num%d/STA_%s.pdf',NUM_EXP,channelName))

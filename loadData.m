@@ -2,7 +2,11 @@
 %% Choose experiment to load
 clear
 
-NUM_EXP = 3
+NUM_EXP = 1
+%NUM_EXP = 2
+%NUM_EXP = 3
+%NUM_EXP = 4
+
 
 switch NUM_EXP
     case 1        
@@ -50,11 +54,15 @@ size(stim)
 clf
 subplot(131)
 imshow(reshape(stim(1,:),[height, width]))
+xlabel('x');ylabel('y');axis xy
+
 subplot(132)
 imshow(reshape(stim(2,:),[height, width]))
+xlabel('x');ylabel('y');axis xy
+
 subplot(133)
 imshow(reshape(stim(3,:),[height, width]))
-
+xlabel('x');ylabel('y');axis xy
 
 
 %%  load SpikeTrain Dataset & save txt
