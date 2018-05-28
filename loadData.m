@@ -102,6 +102,9 @@ xlabel('x');ylabel('y');axis xy
 %%  load SpikeTrain Dataset & save txt
 
 matFiles = dir([SpikeTrainFolderName '*.mat']);
+if isempty(matFiles)
+    error('Cannot load spike train data')
+end
 matFiles = {matFiles.name};
 
 cnt = 1;
