@@ -1,6 +1,12 @@
 # retina
 retina project (collaboration with CBNU College of Medicine)
 
+## Updated Codes (May 28, 2018)
+* loadData.m - load data in mat files (and save to txt files)
+* calcSTAprestim.m - calcSTA using "pre stim"
+* runSTAprestim.m - run STA for a channel
+
+
 ## Codes
 * loadData.m - load data in mat files (and save to txt files)
 * runSTA.m - run STA for a channel
