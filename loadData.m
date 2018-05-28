@@ -2,11 +2,15 @@
 %% Choose experiment to load
 clear
 
-NUM_EXP = 1
+%NUM_EXP = 1
 %NUM_EXP = 2
 %NUM_EXP = 3
 %NUM_EXP = 4
-
+%NUM_EXP = 5
+%NUM_EXP = 6
+%NUM_EXP = 7
+%NUM_EXP = 8
+NUM_EXP = 9
 
 switch NUM_EXP
     case 1        
@@ -33,6 +37,36 @@ switch NUM_EXP
                 
         height=26,width=26
         fps = 20 %  set manually according to the SpikeTrainFolderName        
+    case 5
+        StimInfoFileName = '20180524/StimInfo_8pix_200um_10Hz.mat'
+        SpikeTrainFolderName = '20180524/SpikeTrain_20180524/SpikeTrain_ND3_8pix_200um_10Hz/'
+                
+        height=8,width=8
+        fps = 10 %  set manually according to the SpikeTrainFolderName 
+    case 6
+        StimInfoFileName = '20180524/StimInfo_8pix_200um_50Hz.mat'
+        SpikeTrainFolderName = '20180524/SpikeTrain_20180524/SpikeTrain_ND3_8pix_200um_50Hz/'
+                
+        height=8,width=8
+        fps = 50 %  set manually according to the SpikeTrainFolderName       
+     case 7
+        StimInfoFileName = '20180524/StimInfo_8pix_200um_10Hz.mat'
+        SpikeTrainFolderName = '20180524/SpikeTrain_20180524/SpikeTrain_ND2_8pix_200um_10Hz_#1/'
+                
+        height=8,width=8
+        fps = 10 %  set manually according to the SpikeTrainFolderName          
+     case 8
+        StimInfoFileName = '20180524/StimInfo_8pix_200um_50Hz.mat'
+        SpikeTrainFolderName = '20180524/SpikeTrain_20180524/SpikeTrain_ND2_8pix_200um_50Hz/'
+                
+        height=8,width=8
+        fps = 50 %  set manually according to the SpikeTrainFolderName 
+     case 9
+        StimInfoFileName = '20180524/StimInfo_8pix_200um_10Hz.mat'
+        SpikeTrainFolderName = '20180524/SpikeTrain_20180524/SpikeTrain_ND2_8pix_200um_10Hz_#2/'
+                
+        height=8,width=8
+        fps = 10 %  set manually according to the SpikeTrainFolderName 
         
     otherwise
         error('Cannot load data')
