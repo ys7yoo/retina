@@ -12,6 +12,7 @@ retina project (collaboration with CBNU College of Medicine)
 * runSTA.m - run STA for a channel
 * runSTAbatch.m - run STA for all the channels
 * calcSTA.m - core function to calc STA
+* estimGLM.m - calc STA, GLM, and bilinear GLM (for some channels)
 
 
 ## How to run STA
