@@ -9,7 +9,7 @@ loadData
 
 %% choose one channel from channelNames (MANUAL for now)
 disp(channelNames)
-channelName = 'ch_47b'
+channelName = 'ch_46a'
 %channelName = 'ch_48a'
 %channelName = 'ch_65b'
 %channelName = 'ch_66a'
@@ -39,6 +39,7 @@ imshow(STA')
 xlabel('t')
 ylabel('pixel')
 title('STA')
+colormap gray
 
 STAmean = mean(STA,1);
 subplot(322)

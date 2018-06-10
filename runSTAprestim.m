@@ -19,7 +19,8 @@ spikeTime=eval(channelName);
 %% call here
 
 % choose spike during the stim only!
-W = 0.5; % Window in sec
+%W = 0.5; % Window in sec
+W = 0.8; % Window in sec
 %[STA, gridT] = calcSTAintp(stim, A1a, spikeTime, W, fps);
 [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
 % % W = 0.5*fps;    % window size 
