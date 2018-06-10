@@ -19,3 +19,6 @@ retina project (collaboration with CBNU College of Medicine)
 2. Run `runSTAbatch.m` to calc STA for all the channels.
 
 
+## How to run GLM
+1. Install [GLMspiketools](https://github.com/ys7yoo/GLMspiketools) developed by J. Pillow.
+2. Run `estimGLM.m` to calc STA, GLM, and bilinear GLM for some chosen channels.
