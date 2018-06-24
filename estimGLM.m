@@ -115,7 +115,7 @@ fprintf('Initial negative log-likelihood: %.5f\n', negloglival0);
 
 % Do ML estimation of model params
 opts = {'display', 'iter', 'maxiter', 100};
-[gg1, negloglival1a] = MLfit_GLM(gg0,StimChosen,opts); % do ML (requires optimization toolbox)
+[gg1, negloglival1a, H1, Xstruct1] = MLfit_GLM(gg0,StimChosen,opts); % do ML (requires optimization toolbox)
 
 
 
@@ -174,4 +174,17 @@ box off
 set(gcf, 'paperposition', [0 0 10 8])
 set(gcf, 'papersize', [10 8])
 saveas(gcf, sprintf('Num%d_GLM_%s.pdf',NUM_EXP,channelName))
+
+
+return
+
+%% Let's further understand the effect of each component
+
+
+% gg1, negloglival1a, H1, Xstruct1
+
+prs1 = [gg1.kt(:); gg1.dc; gg1.ihw; gg1.ihw2];
+Loss_GLM_logli_exp(prs1,Xstruct1)
+
+
 
