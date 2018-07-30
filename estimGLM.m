@@ -115,7 +115,7 @@ fprintf('Initial negative log-likelihood: %.5f\n', negloglival0);
 
 % Do ML estimation of model params
 opts = {'display', 'iter', 'maxiter', 100};
-[gg3, negloglival1a, H1, Xstruct1] = MLfit_GLM(gg0,StimChosen,opts); % do ML (requires optimization toolbox)
+[gg1, negloglival1a, H1, Xstruct1] = MLfit_GLM(gg0,StimChosen,opts); % do ML (requires optimization toolbox)
 
 
 
