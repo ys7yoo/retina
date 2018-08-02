@@ -140,7 +140,7 @@ end
 % Set an example filter shapes
 
 %wself = [-10; 3.2; -1]; % weights for self-coupling term
-wself = [-3; 0.5]
+wself = [-3; 0.5];
 ihself = ihbasis*wself; % self-coupling filter
 wcpl = 0.5; % weights for cross-coupling term
 ihcpl = ihbasis2*wcpl; % cross-coupling filter
@@ -234,7 +234,13 @@ end
 ymax = min(ymax,10)
 
 for jj = 1:N
-    subplot(2,3,jj); % --Spike filters cell jj % -------------
+    switch N
+        case 7 
+            subplot(3,3,jj); 
+        otherwise
+            subplot(2,3,jj); 
+            
+    end
     ccpl = setdiff(1:N,jj); % coupled cells
     cnums = [jj, ccpl];  % put self-coupling at the first
     %plot(gg.iht, exp(gg.ih(:,cnums(1:ncolrs),jj)),'--', 'linewidth', lw); hold on % true
@@ -244,7 +250,7 @@ for jj = 1:N
     title(sprintf(' cell %s',channelNames{jj}(4:end) )); axis tight; set(gca,'ylim',[0,ymax]);
     box off
     
-    if jj==1 || jj==4
+    if jj==1 || jj==4 || jj ==7
         ylabel('gain (sp/s)'); 
     end
     xlabel('time after spike (s)');
