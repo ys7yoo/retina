@@ -16,8 +16,15 @@ addpath([basedir '/glmtools_spline/']);
 %% load data! 
 
 clear
-CELL_TYPE = 'ON'
-NUM_SET = 1
+CELL_TYPE = input('Cell type? (ON or OFF) ')
+NUM_SET = input('Set number? ')
+%CELL_TYPE = 'ON'
+%NUM_SET = 1
+% NUM_SET = 2
+% NUM_SET = 3
+% NUM_SET = 4
+% NUM_SET = 5
+
 
 loadDataNet  % 20180724
 
@@ -110,7 +117,7 @@ nht = length(iht); % number of bins
 
 % Make basis for cross-coupling term
 ihbasprs2.ncols = 1;  % number of basis vectors
-ihbasprs2.hpeaks = [0.1, .25]; % put peak at 5ms and "effective" 1st peak at 0
+ihbasprs2.hpeaks = [0.1, .2]; % put peak at 5ms and "effective" 1st peak at 0
 %ihbasprs2.b = .001;  % smaller -> more logarithmic scaling
 ihbasprs2.b = .005;  % smaller -> more logarithmic scaling
 ihbasprs2.absref = []; % no abs-refracotry period for this one
@@ -218,7 +225,13 @@ end
 clf reset; 
 colors = get(gca,'colororder');
 ncolrs = min(size(colors,1),N); % number of traces to plot for each cell 
-ymax = max(exp([ggfit(1).ih(:);ggfit(2).ih(:);ggfit(3).ih(:);ggfit(4).ih(:);ggfit(5).ih(:)])); % max of y range
+
+% find max of y range
+ymax = 0;
+for n=1:N
+    ymax = max([exp(ggfit(n).ih(:)); ymax]); 
+end
+ymax = min(ymax,10)
 
 for jj = 1:N
     subplot(2,3,jj); % --Spike filters cell jj % -------------
