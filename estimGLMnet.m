@@ -16,7 +16,7 @@ addpath([basedir '/glmtools_spline/']);
 %% load data! 
 
 clear
-CELL_TYPE = input('Cell type? (ON or OFF) ')
+CELL_TYPE = input('Cell type? (ON or OFF) ' ,'s')
 NUM_SET = input('Set number? ')
 %CELL_TYPE = 'ON'
 %NUM_SET = 1
