@@ -99,6 +99,10 @@ dtStim = 1 / fps;
 dtSpike = 1 / fps;
 nkt  = size(STAchosen,1);  % number of bins for stimulus filter
 nkbasis = 4;  % number of basis vectors for representing k
+%nkbasis = 5;  % number of basis vectors for representing k
+%nkbasis = 6;  % number of basis vectors for representing k
+%nkbasis = 7;  % number of basis vectors for representing k
+%nkbasis = 8;  % number of basis vectors for representing k
 nhbasis = 2;  % number of basis vectors for representing h
 hpeakFinal = .1;   % time of peak of last basis vector for h
 gg0 = makeFittingStruct_GLM(dtStim,dtSpike,nkt,nkbasis,STAchosen)
@@ -173,10 +177,27 @@ box off
 % save figure
 set(gcf, 'paperposition', [0 0 10 8])
 set(gcf, 'papersize', [10 8])
-saveas(gcf, sprintf('Num%d_GLM_%s.pdf',NUM_EXP,channelName))
+saveas(gcf, sprintf('Num%d_GLM_%s_nkbasis%d.pdf',NUM_EXP,channelName,nkbasis))
 
 
 return
+
+
+%% variables of interests
+
+Xstim = Xstruct1.Xstim;   % 9000 x 32
+
+kt = gg1.kt               % 4 x 8 
+dc = gg1.dc               % scalar
+
+% spikeTrain              % 9000x1
+
+%% save ethem 
+save('kt.txt','kt','-ascii')
+save('dc.txt','dc','-ascii')
+save('Xstim.txt','Xstim','-ascii')
+save('spikeTrain.txt','spikeTrain','-ascii')
+
 
 %% Let's further understand the effect of each component
 

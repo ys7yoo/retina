@@ -13,7 +13,7 @@ ktbasprs.b = 10; % Offset for nonlinear scaling (larger -> more linear)
     
 plot(ktbasis)
 box off
-
+title('4 basis')
 
 subplot(212)
 nkbasis = 8
@@ -27,3 +27,10 @@ ktbasprs.b = 10; % Offset for nonlinear scaling (larger -> more linear)
 plot(ktbasis)
 xlabel('time bin')
 box off
+title('8 basis')
+
+
+set(gcf, 'paperposition', [0 0 6 5])
+set(gcf, 'papersize', [6 5])
+saveas(gcf, sprintf('GLM_nkbasis_4_vs_8.pdf'))
+
