@@ -139,6 +139,34 @@ opts = {'display', 'iter'};
 [gg2, negloglival2] = MLfit_GLMbi(gg0b,StimChosen,opts); % do ML (requires optimization toolbox)
 
 
+%% Fit GLM with post-spike filter (2018.07.24)
+
+%  Initialize params for fitting --------------
+% Set params for fitting, including bases 
+dtStim = 1 / fps;
+dtSpike = 1 / fps;
+nkt  = size(STAchosen,1);  % number of bins for stimulus filter
+nkbasis = 4;  % number of basis vectors for representing k
+nhbasis = 2;  % number of basis vectors for representing h
+hpeakFinal = .2;   % time of peak of last basis vector for h
+%gg3 = makeFittingStruct_GLM(dtStim,dtSpike,nkt,nkbasis,STAchosen)
+gg3 = makeFittingStruct_GLM(dtStim,dtSpike,nkt,nkbasis,STAchosen,nhbasis,hpeakFinal);  % add history filter 
+
+
+gg3.sps = spikeTrain;  % Insert binned spike train into fitting struct
+gg3.mask = [];  % Not currently supported!; % insert mask (optional)
+gg3.ihw = randn(size(gg3.ihw))*1; % initialize spike-history weights randomly
+
+% Compute conditional intensity at initial parameters 
+[negloglival0,rr] = neglogli_GLM(gg3,StimChosen);
+fprintf('Initial negative log-likelihood: %.5f\n', negloglival0);
+
+% Do ML estimation of model params
+opts = {'display', 'iter', 'maxiter', 100};
+[gg3, negloglival1a, H1, Xstruct1] = MLfit_GLM(gg3,StimChosen,opts); % do ML (requires optimization toolbox)
+
+
+
 %%  plot results
 clf
 subplot(321)
@@ -155,29 +183,98 @@ axis tight
 box off
 
 subplot(323)
-imagesc(gg1.k'); title('Estimate of K by full GLM'); ylabel('chosen pixel index'); xlabel('time bin');
+imagesc(gg3.k'); title('Estimated K using GLM'); ylabel('chosen pixel index'); xlabel('time bin');
 axis xy
 
 subplot(324)
-plot(gg1.k)
+plot(gg3.k)
 xlabel('time bin')
 axis tight
 box off
 
+% subplot(325)
+% imagesc(gg2.k'); title('Estimate of K by bi-linear GLM'); ylabel('chosen pixel index'); xlabel('time bin');
+% axis xy
+% 
+% subplot(326)
+% plot(gg2.k)
+% xlabel('time bin')
+% axis tight
+% box off
+
 subplot(325)
-imagesc(gg2.k'); title('Estimate of K by bi-linear GLM'); ylabel('chosen pixel index'); xlabel('time bin');
+imagesc(gg3.k'); title('Estimated K using GLM with post-spike filter'); ylabel('chosen pixel index'); xlabel('time bin');
 axis xy
 
 subplot(326)
-plot(gg2.k)
+plot(gg3.k)
 xlabel('time bin')
 axis tight
 box off
+
 
 % save figure
 set(gcf, 'paperposition', [0 0 10 8])
 set(gcf, 'papersize', [10 8])
 saveas(gcf, sprintf('Num%d_GLM_%s_nkbasis%d.pdf',NUM_EXP,channelName,nkbasis))
+
+
+
+
+
+%% Let's compare GLMs with and without history filter (2018. 7.24)
+
+clf
+YLIM = [-0.8 0.7];  % for common reference
+
+subplot(221)
+plot(gg1.k)
+ylabel('K')
+set(gca, 'ylim', YLIM)
+xlabel('time bin')
+box off
+title(sprintf('linear filter without post-spike filter (no. of basis=%d)',nkbasis))
+
+
+subplot(222)
+plot(gg3.k)
+ylabel('K')
+set(gca, 'ylim', YLIM)
+xlabel('time bin')
+box off
+title(sprintf('linear filter with post-spike filter (no. of basis=%d)',nkbasis))
+
+
+subplot(234)
+plot(gg3.ih)
+xlabel('post-spike time bin'); box off
+ylabel('h')
+title(sprintf('post-spike filter (no. of basis=%d)',nhbasis))
+
+
+
+subplot(235)
+plot(gg1.k(:),gg3.k(:), 'o'); hold on
+plot([-1 1], [-1 1], 'k--'); axis equal tight; box off
+xlabel('K without h')
+ylabel('K with h')
+title('values of K (all pixel)')
+
+% let's compare variance of K for each pixel
+subplot(236)
+var1=var(gg1.k,[],2)
+var3=var(gg3.k,[],2)
+plot(var1,var3,'o'); hold on
+plot([0 0.1], [0 0.1], 'k--'); axis equal tight; box off
+xlabel('var(K) without h')
+ylabel('var(K) with h')
+title('variances of K (each pixel)')
+
+% save figure
+set(gcf, 'paperposition', [0 0 12 8])
+set(gcf, 'papersize', [12 8])
+saveas(gcf, sprintf('Num%d_GLM_%s_K_and_H.pdf',NUM_EXP,channelName))
+
 
 
 return
