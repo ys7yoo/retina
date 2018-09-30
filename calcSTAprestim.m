@@ -36,7 +36,7 @@ stimTriggeredSpike = [];
 %stimTriggeredSpike = zeros(height,width,W,numSpike);
 cnt = 1;
 for st=1:length(spikeTime)
-    if spikeTime(st) > stimTime(W*fps+1) && spikeTime(st) < stimTime(end)
+    if spikeTime(st) > stimTime(round(W*fps)+1) && spikeTime(st) < stimTime(end)
         
         % find indices of pre-stim
         idxPreStim=find(stimTime<spikeTime(st));

@@ -29,16 +29,18 @@ fps = input('frame per second? (10 or 25) ')
 % NUM_SET = 5
 
 
-loadDataNet  % 20180820
+loadDataNet 
 
 
 %% First, run STA independently for all the channels 
 %W = 1; % Window in sec
 %W = 0.8; % Window in sec
-W = 0.5; % Window in sec
+%W = 0.5; % Window in sec
+W = 0.6; % Window in sec
 
 
-clear STAs % STAs will be stored here
+clear STAall
+clear STAs  % STAs will be stored here
 
 for i = 1:length(channelNames)
     
@@ -46,7 +48,8 @@ for i = 1:length(channelNames)
     spikeTime=eval(channelName);
     
     [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
-
+    %save STA
+    STAall{i} = STA;
 
     
     %figure(i)
@@ -59,7 +62,7 @@ for i = 1:length(channelNames)
     set(gcf, 'paperposition', [0 0 12 10])
     set(gcf, 'papersize', [12 10])
 
-    saveas(gcf, sprintf('%scell_%s_STA.pdf', CELL_TYPE, channelName))
+    saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channelName))
     
 end
 
@@ -77,7 +80,7 @@ legend(channelNames, 'location', 'NW','Interpreter', 'none'); legend boxoff
 set(gcf, 'paperposition', [0 0 6 4])
 set(gcf, 'papersize', [6 4])
 
-saveas(gcf, sprintf('%scell_STAs.pdf', CELL_TYPE))
+saveas(gcf, sprintf('%scell_%dHz_STAs.pdf', CELL_TYPE, fps))
 
 
 %% Now, let's fit GLM!
@@ -134,29 +137,55 @@ imagesc(spikeTrain', [0 1]); colormap gray
 %% Set up basis for coupling filters
 
 % Make basis for self-coupling term
-ihbasprs.ncols = 2; % number of basis vectors
-ihbasprs.hpeaks = [.1, .2]; % peak of 1st and last basis vector
+% ihbasprs.ncols = 2; % number of basis vectors
+% ihbasprs.hpeaks = [.1, .2]; % peak of 1st and last basis vector
+% ihbasprs.ncols = 3; % number of basis vectors
+% ihbasprs.hpeaks = [.1, .2, .3]; % peak of 1st and last basis vector
 
-ihbasprs.ncols = 1; % number of basis vectors
-ihbasprs.hpeaks = 0.1; % peak of 1st and last basis vector
+switch fps
+    case 10   % for 10 Hz datasets        
+        % param for self-coupling filters
+        ihbasprs.ncols = 1; % number of basis vectors
+        ihbasprs.hpeaks = 0.1; % peak of 1st and last basis vector
+        
+        %ihbasprs.b = .001;  % scaling (smaller -> more logarithmic scaling)
+        ihbasprs.b = .02;  % scaling (smaller -> more logarithmic scaling)
+        %ihbasprs.b = 0.1;  % scaling (smaller -> more logarithmic scaling)
+        ihbasprs.absref = []; % absolute refractory period basis vector (optional)
 
+        % param for cross-coupling filters
+        ihbasprs2.ncols = 1;  % number of basis vectors
+        ihbasprs2.hpeaks = [0.01, .1]; % put peak at 0.1s and "effective" 1st peak at 0
+        %ihbasprs2.b = .001;  % smaller -> more logarithmic scaling
+        %ihbasprs2.b = .01;  % smaller -> more logarithmic scaling
+        ihbasprs2.b = .1;  % smaller -> more logarithmic scaling
+        ihbasprs2.absref = []; % no abs-refracotry period for this one
 
-%ihbasprs.b = .001;  % scaling (smaller -> more logarithmic scaling)
-ihbasprs.b = .01;  % scaling (smaller -> more logarithmic scaling)
-%ihbasprs.b = .1;  % scaling (smaller -> more logarithmic scaling)
-ihbasprs.absref = []; % absolute refractory period basis vector (optional)
-% Make basis 
+    case 25
+        % param for self-coupling filters
+        ihbasprs.ncols = 1; % number of basis vectors
+        ihbasprs.hpeaks = 0.04; % peak of 1st and last basis vector
+        
+        %ihbasprs.b = .001;  % scaling (smaller -> more logarithmic scaling)
+        ihbasprs.b = .02;  % scaling (smaller -> more logarithmic scaling)
+        %ihbasprs.b = 0.1;  % scaling (smaller -> more logarithmic scaling)
+        ihbasprs.absref = []; % absolute refractory period basis vector (optional)
+
+        % param for cross-coupling filters
+        ihbasprs2.ncols = 1;  % number of basis vectors
+        ihbasprs2.hpeaks = [0.01, 0.04*2]; % put peak at 0.1s and "effective" 1st peak at 0
+        %ihbasprs2.b = .001;  % smaller -> more logarithmic scaling
+        %ihbasprs2.b = .01;  % smaller -> more logarithmic scaling
+        ihbasprs2.b = .1;  % smaller -> more logarithmic scaling
+        ihbasprs2.absref = []; % no abs-refracotry period for this one
+        
+end
+
+% Make basis for self-coupling filter
 [iht,ihbas,ihbasis] = makeBasis_PostSpike(ihbasprs,dtSpike);
 nht = length(iht); % number of bins
 
-% Make basis for cross-coupling term
-ihbasprs2.ncols = 1;  % number of basis vectors
-ihbasprs2.hpeaks = [0.01, .1]; % put peak at 5ms and "effective" 1st peak at 0
-%ihbasprs2.b = .001;  % smaller -> more logarithmic scaling
-ihbasprs2.b = .01;  % smaller -> more logarithmic scaling
-%ihbasprs2.b = .1;  % smaller -> more logarithmic scaling
-ihbasprs2.absref = []; % no abs-refracotry period for this one
-% Make basis
+% Make basis for cross-coupling filter
 [iht2,ihbas2,ihbasis2] = makeBasis_PostSpike(ihbasprs2,dtSpike);
 nht2 = length(iht2);
 
@@ -176,6 +205,7 @@ end
 
 %wself = [-10; 3.2; -1]; % weights for self-coupling term
 wself = [-3; 0.5];
+wself = wself(1:ihbasprs.ncols);
 ihself = ihbasis*wself; % self-coupling filter
 wcpl = 0.5; % weights for cross-coupling term
 ihcpl = ihbasis2*wcpl; % cross-coupling filter
@@ -208,8 +238,8 @@ set(gca,'xlim',XLIM);
 
 set(gcf, 'paperposition', [0 0 6 9])
 set(gcf, 'papersize', [6 9])
-saveas(gcf, 'coupling-filters-basis.pdf')
-saveas(gcf, 'coupling-filters-basis.png')
+saveas(gcf, sprintf('coupling-filters-basis_%dHz.pdf',fps))
+saveas(gcf, sprintf('coupling-filters-basis_%dHz.png',fps))
 
 
 %% Fit GLM 
@@ -228,7 +258,7 @@ ggInit = makeFittingStruct_GLM(dtStim,dtSpike,nkt,nkbasis,STA)
 ggInit.ihbas = ihbas; % h self-coupling basis
 ggInit.ihbas2 = ihbas2; % h coupling-filter basis
 nhbasis = size(ihbas,2); % number of basis vectors in h basis
-nhbasis2 = size(ihbas2,N-1); % number of basis vectors in h basis
+nhbasis2 = size(ihbas2,2); % number of basis vectors in h basis
 ggInit.ihw = zeros(nhbasis,1); % init params for self-coupling filter
 ggInit.ihw2 = zeros(nhbasis2,N-1); % init params for cross-coupling filter
 ggInit.ih = [ggInit.ihbas*ggInit.ihw ggInit.ihbas2*ggInit.ihw2];
@@ -259,6 +289,20 @@ for jj = 1:N
 end
 
 
+%% plot linear filter of the last cell (for check)
+clf;colormap gray
+for n=1:N
+    %%
+    subplot(2,N,n);imagesc(STAall{n}');  ylabel('pixel'); xlabel('time bin');
+    title(sprintf('STA of %s', channelNames{n}),'Interpreter', 'none')
+    subplot(2,N,n+N);imagesc(ggfit(n).k'); ylabel('pixel'); xlabel('time bin')
+    title(sprintf('Linear filter by GLM of %s', channelNames{n}),'Interpreter', 'none')
+end
+set(gcf, 'paperposition', [0 0 6 8])
+set(gcf, 'papersize', [6 8])
+saveas(gcf, sprintf('%scell_%dHz_STA_vs_GLM.pdf', CELL_TYPE,fps))
+
+
 %% plot coupling filters
 clf reset; 
 colors = get(gca,'colororder');
@@ -269,22 +313,21 @@ ymax = 0;
 for n=1:N
     ymax = max([exp(ggfit(n).ih(:)); ymax]); 
 end
-ymax = min(ymax,10)
+ymax = min(ymax,10);
 
+
+
+switch N
+    case 7 
+        num_row=3;num_col=3;
+    otherwise
+        num_row=1;num_col=N;
+end
+    
 for jj = 1:N
-    switch N
-        case 7 
-            subplot(3,3,jj); 
-        otherwise
-            subplot(2,3,jj); 
-            
-    end
-    ccpl = setdiff(1:N,jj); % coupled cells
-    cnums = [jj, ccpl];  % put self-coupling at the first
-    %plot(gg.iht, exp(gg.ih(:,cnums(1:ncolrs),jj)),'--', 'linewidth', lw); hold on % true
-    plot(ggfit(jj).iht, exp(ggfit(jj).ih(:,1:ncolrs)), '-', 'linewidth', 2); % estim
-    %hold on; plot(gg.iht, gg.iht*0+1, 'k'); hold off;
-    %title(sprintf('cell %d filters',jj)); axis tight; set(gca,'ylim',[0,ymax]);
+    subplot(num_row,num_col,jj); 
+    plot(ggfit(jj).iht, exp(ggfit(jj).ih(:,1)), '--k', 'linewidth', 2); hold on
+    plot(ggfit(jj).iht, exp(ggfit(jj).ih(:,2:ncolrs)), '-', 'linewidth', 2); % estim
     title(sprintf(' cell %s',channelNames{jj}(4:end) )); axis tight; set(gca,'ylim',[0,ymax]);
     box off
     
@@ -295,7 +338,7 @@ for jj = 1:N
 end
 
 
-set(gcf, 'paperposition', [0 0 9 5])
-set(gcf, 'papersize', [9 5])
- saveas(gcf, sprintf('%scell_set%d_coupling_filters.pdf', CELL_TYPE, NUM_SET))
+set(gcf, 'paperposition', [0 0 3*num_col 3*num_row])
+set(gcf, 'papersize', [3*num_col 3*num_row])
+saveas(gcf, sprintf('%scell_%dHz_coupling_filters.pdf', CELL_TYPE,fps))
 
