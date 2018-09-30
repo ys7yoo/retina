@@ -1,12 +1,25 @@
 
 %% Choose set to load
 
-% data in 20180724
-StimInfoFileName = '20180724/StimInfo_8pix_200um_10Hz.mat'
-SpikeTrainFolderName = sprintf('20180724/SpikeTrain_20180724/%scell/set%d/', CELL_TYPE, NUM_SET)
+% data in 20180828_GLM_CouplingFilter_SameRGCtype
+base_folder_name = 'data/20180828_GLM_CouplingFilter_SameRGCtype';
+
+% 10 Hz or 25 Hz data
+StimInfoFileName = fullfile(base_folder_name, sprintf('StimInfo_8pix_163um_%dHz.mat',fps))
+SpikeTrainFolderName = fullfile(base_folder_name, sprintf('SpikeTrain_20180828/%scell/%dHz/', CELL_TYPE, fps))
+
+
+% % data in 20180820
+% StimInfoFileName = '20180820/StimInfo_8pix_200um_10Hz.mat'
+% SpikeTrainFolderName = sprintf('20180820/SpikeTrain_20180820/%scell/set%d/', CELL_TYPE, NUM_SET)
+
+
+% % data in 20180724
+% StimInfoFileName = '20180724/StimInfo_8pix_200um_10Hz.mat'
+% SpikeTrainFolderName = sprintf('20180724/SpikeTrain_20180724/%scell/set%d/', CELL_TYPE, NUM_SET)
 
 height=8,width=8
-fps = 10 %  set manually according to the SpikeTrainFolderName 
+
         
 dtStim = 1 / fps;
 dtSpike = 1 / fps;
@@ -57,7 +70,7 @@ for i = 1:length(matFiles)
     end
     
     fprintf('Loading %s\n', fileName)
-    load([SpikeTrainFolderName fileName])
+    load(fullfile(SpikeTrainFolderName, fileName))
     
     % save to txt file
     save([SpikeTrainFolderName channelName '.txt'], channelName, '-ascii')

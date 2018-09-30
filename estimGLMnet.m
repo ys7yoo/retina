@@ -16,8 +16,11 @@ addpath([basedir '/glmtools_spline/']);
 %% load data! 
 
 clear
+% load 20180828_GLM_CouplingFilter_SameRGCtype 
 CELL_TYPE = input('Cell type? (ON or OFF) ' ,'s')
-NUM_SET = input('Set number? ')
+fps = input('frame per second? (10 or 25) ')
+
+%NUM_SET = input('Set number? ')
 %CELL_TYPE = 'ON'
 %NUM_SET = 1
 % NUM_SET = 2
@@ -26,11 +29,17 @@ NUM_SET = input('Set number? ')
 % NUM_SET = 5
 
 
-loadDataNet  % 20180724
+loadDataNet  % 20180820
 
 
 %% First, run STA independently for all the channels 
-W = 0.8; % Window in sec
+%W = 1; % Window in sec
+%W = 0.8; % Window in sec
+W = 0.5; % Window in sec
+
+
+clear STAs % STAs will be stored here
+
 for i = 1:length(channelNames)
     
     channelName = channelNames{i}
@@ -38,18 +47,37 @@ for i = 1:length(channelNames)
     
     [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
 
+
+    
     %figure(i)
     clf
-    plotSTA(STA, gridT, width, height)
-
+    STA_max_var = find_STA_with_max_var(STA, gridT, width, height)
+    
+    STAs(:,i) = STA_max_var; % store STA with maximum variance (center)
+    
     % save figure 
     set(gcf, 'paperposition', [0 0 12 10])
     set(gcf, 'papersize', [12 10])
 
-    saveas(gcf, sprintf('%scell_set%d_%s_STA.pdf', CELL_TYPE, NUM_SET,channelName))
+    saveas(gcf, sprintf('%scell_%s_STA.pdf', CELL_TYPE, channelName))
     
 end
 
+% plot STAs of multiple cells
+clf
+plot(gridT, STAs, 'linewidth',2)
+ylabel('stim intensity')
+xlabel('t')
+title('STAs with the largest variance')
+box off
+
+legend(channelNames, 'location', 'NW','Interpreter', 'none'); legend boxoff
+
+
+set(gcf, 'paperposition', [0 0 6 4])
+set(gcf, 'papersize', [6 4])
+
+saveas(gcf, sprintf('%scell_STAs.pdf', CELL_TYPE))
 
 
 %% Now, let's fit GLM!
@@ -108,8 +136,14 @@ imagesc(spikeTrain', [0 1]); colormap gray
 % Make basis for self-coupling term
 ihbasprs.ncols = 2; % number of basis vectors
 ihbasprs.hpeaks = [.1, .2]; % peak of 1st and last basis vector
+
+ihbasprs.ncols = 1; % number of basis vectors
+ihbasprs.hpeaks = 0.1; % peak of 1st and last basis vector
+
+
 %ihbasprs.b = .001;  % scaling (smaller -> more logarithmic scaling)
-ihbasprs.b = .05;  % scaling (smaller -> more logarithmic scaling)
+ihbasprs.b = .01;  % scaling (smaller -> more logarithmic scaling)
+%ihbasprs.b = .1;  % scaling (smaller -> more logarithmic scaling)
 ihbasprs.absref = []; % absolute refractory period basis vector (optional)
 % Make basis 
 [iht,ihbas,ihbasis] = makeBasis_PostSpike(ihbasprs,dtSpike);
@@ -117,9 +151,10 @@ nht = length(iht); % number of bins
 
 % Make basis for cross-coupling term
 ihbasprs2.ncols = 1;  % number of basis vectors
-ihbasprs2.hpeaks = [0.1, .2]; % put peak at 5ms and "effective" 1st peak at 0
+ihbasprs2.hpeaks = [0.01, .1]; % put peak at 5ms and "effective" 1st peak at 0
 %ihbasprs2.b = .001;  % smaller -> more logarithmic scaling
-ihbasprs2.b = .005;  % smaller -> more logarithmic scaling
+ihbasprs2.b = .01;  % smaller -> more logarithmic scaling
+%ihbasprs2.b = .1;  % smaller -> more logarithmic scaling
 ihbasprs2.absref = []; % no abs-refracotry period for this one
 % Make basis
 [iht2,ihbas2,ihbasis2] = makeBasis_PostSpike(ihbasprs2,dtSpike);
@@ -151,22 +186,25 @@ ihcpl = ihbasis2*wcpl; % cross-coupling filter
 
 c = get(0, 'DefaultAxesColorOrder');
 
+XLIM = [0 0.7];
 clf
 subplot(311); 
 plot(iht, ihbasis, 'Color', c(1,:), 'linewidth', 2); hold on
 plot(ihbasprs.hpeaks, 1, '*k', 'linewidth', 1) %, 'MarkerSize', 7);
 xlabel('time after spike (s)'); title('post-spike basis'); box off
+set(gca,'xlim',XLIM);
 subplot(312); 
 plot(iht2, ihbasis2, 'Color', c(2,:), 'linewidth', 2); hold on
 plot(ihbasprs2.hpeaks, 1, '*k', 'linewidth', 1) %, 'MarkerSize', 7);
 xlabel('time after spike (s)'); title('coupling basis'); box off
-
+set(gca,'xlim',XLIM);
 subplot(313); 
 plot(iht, exp(ihself), iht, exp(ihcpl), iht, iht*0+1, 'k:', 'linewidth', 2);
 legend('self-coupling', 'cross-coupling');
 xlabel('time lag (s)');
 ylabel('gain (sp/s)');
 box off
+set(gca,'xlim',XLIM);
 
 set(gcf, 'paperposition', [0 0 6 9])
 set(gcf, 'papersize', [6 9])
