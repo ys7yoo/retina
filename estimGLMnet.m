@@ -294,12 +294,12 @@ clf;colormap gray
 for n=1:N
     %%
     subplot(2,N,n);imagesc(STAall{n}');  ylabel('pixel'); xlabel('time bin');
-    title(sprintf('STA of %s', channelNames{n}),'Interpreter', 'none')
+    title(sprintf('STA (%s)', channelNames{n}),'Interpreter', 'none')
     subplot(2,N,n+N);imagesc(ggfit(n).k'); ylabel('pixel'); xlabel('time bin')
-    title(sprintf('Linear filter by GLM of %s', channelNames{n}),'Interpreter', 'none')
+    title(sprintf('k by GLM (%s)', channelNames{n}),'Interpreter', 'none')
 end
-set(gcf, 'paperposition', [0 0 6 8])
-set(gcf, 'papersize', [6 8])
+set(gcf, 'paperposition', [0 0 8 8])
+set(gcf, 'papersize', [8 8])
 saveas(gcf, sprintf('%scell_%dHz_STA_vs_GLM.pdf', CELL_TYPE,fps))
 
 
