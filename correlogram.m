@@ -56,10 +56,32 @@ box off
 title (sprintf('autocoorelogram (\\Deltat=%f)',dt))
 
 %% Example. crosscorreogram for ch_22a and ch_31b
+
 [bin, count,dt] = correlogram(ch_22a, ch_31b, [-0.2 0.2], 401);
+
+clf
 bar(bin,count, 'k')
 xlabel('\Deltat (sec)')
 ylabel('count')
 box off
-title (sprintf('autocoorelogram (\\Deltat=%f)',dt))
+title (sprintf('autocoorelogram (\\Deltat=%.3f)',dt))
+
+% % avg_time_diff=bin*count'/sum(count)
+% % ylim=get(gca,'ylim')
+% % hold on; plot(avg_time_diff*[1 1], ylim, 'k--', 'linewidth',5)
+
+
+% calculate average time difference
+idxToCalc= bin>-0.1 & bin<0.1;
+
+bin_chosen = bin(idxToCalc);
+count_chosen = count(idxToCalc);
+avg_time_diff=bin_chosen*count_chosen'/sum(count_chosen)
+
+hold on
+bar(bin_chosen,count_chosen, 'b')
+ylim=get(gca,'ylim')
+plot(avg_time_diff*[1 1], ylim, 'b--', 'linewidth', 6)
+title (sprintf('autocoorelogram (\\Deltat=%.3f), avg=%.3f',dt,avg_time_diff))
+
 
