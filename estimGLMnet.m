@@ -32,60 +32,59 @@ fps = input('frame per second? (10 or 25) ')
 loadDataNet 
 
 
-%% First, run STA independently for all the channels 
-%W = 1; % Window in sec
-%W = 0.8; % Window in sec
-%W = 0.5; % Window in sec
-W = 0.6; % Window in sec
+% % %% First, run STA independently for all the channels 
+% % %W = 1; % Window in sec
+% % %W = 0.8; % Window in sec
+% % %W = 0.5; % Window in sec
+% % W = 0.6; % Window in sec
+% % 
+% % 
+% % clear STAall
+% % clear STAs  % STAs will be stored here
+% % 
+% % for i = 1:length(channelNames)
+% %     
+% %     channelName = channelNames{i}
+% %     spikeTime=eval(channelName);
+% %     
+% %     [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
+% %     %save STA
+% %     STAall{i} = STA;
+% % 
+% %     
+% %     %figure(i)
+% %     clf
+% %     STA_max_var = find_STA_with_max_var(STA, gridT, width, height)
+% %     
+% %     STAs(:,i) = STA_max_var; % store STA with maximum variance (center)
+% %     
+% %     % save figure 
+% %     set(gcf, 'paperposition', [0 0 12 10])
+% %     set(gcf, 'papersize', [12 10])
+% % 
+% %     saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channelName))
+% %     
+% % end
+% % 
+% % % plot STAs of multiple cells
+% % clf
+% % plot(gridT, STAs, 'linewidth',2)
+% % ylabel('stim intensity')
+% % xlabel('t')
+% % title('STAs with the largest variance')
+% % box off
+% % 
+% % legend(channelNames, 'location', 'NW','Interpreter', 'none'); legend boxoff
+% % 
+% % 
+% % set(gcf, 'paperposition', [0 0 6 4])
+% % set(gcf, 'papersize', [6 4])
+% % 
+% % saveas(gcf, sprintf('%scell_%dHz_STAs.pdf', CELL_TYPE, fps))
 
 
-clear STAall
-clear STAs  % STAs will be stored here
 
-for i = 1:length(channelNames)
-    
-    channelName = channelNames{i}
-    spikeTime=eval(channelName);
-    
-    [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
-    %save STA
-    STAall{i} = STA;
-
-    
-    %figure(i)
-    clf
-    STA_max_var = find_STA_with_max_var(STA, gridT, width, height)
-    
-    STAs(:,i) = STA_max_var; % store STA with maximum variance (center)
-    
-    % save figure 
-    set(gcf, 'paperposition', [0 0 12 10])
-    set(gcf, 'papersize', [12 10])
-
-    saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channelName))
-    
-end
-
-% plot STAs of multiple cells
-clf
-plot(gridT, STAs, 'linewidth',2)
-ylabel('stim intensity')
-xlabel('t')
-title('STAs with the largest variance')
-box off
-
-legend(channelNames, 'location', 'NW','Interpreter', 'none'); legend boxoff
-
-
-set(gcf, 'paperposition', [0 0 6 4])
-set(gcf, 'papersize', [6 4])
-
-saveas(gcf, sprintf('%scell_%dHz_STAs.pdf', CELL_TYPE, fps))
-
-
-%% Now, let's fit GLM!
-
-%% To do that, need to convert spike time to spike train
+%% For further analysis, need to convert spike time to spike train
 
 N = length(channelNames); % number of neurons 
 
@@ -132,6 +131,116 @@ imagesc(spikeTrain', [0 1]); colormap gray
 % if length(spikeTrain) > T
 %     spikeTrain = spikeTrain(1:T);
 % end
+
+
+
+%% Let's calc STA and STC
+close all
+%clear STA_max_var, max_idx
+
+% sta params
+STA_num_samples = 16;
+gridT = (-STA_num_samples+1:0)/fps;
+
+for n=1:size(spikeTrain,2)
+    %% calc STA and STC
+    [sta{n}, stc{n}] = calc_STA_and_STC(stim, spikeTrain(:,n), STA_num_samples);
+    
+    %% analyze STA (code from find_STA_with_max_var.m)
+    sta_var = var(sta{n},1);
+
+    % find pixel with the maximum variance in STA
+    [~, idx_max] = max(sta_var);
+
+    % choose STA with maximum variance
+    sta_max_var = sta{n}(:,idx_max);
+    
+    
+    %% plot STA
+    clf
+    r=2; c=3;     
+    subplot(r,c,1)
+    imshow(sta{n}')
+    xlabel('t')
+    ylabel('pixel')
+    title('STA')
+
+
+    subplot(r,c,2)
+    imshow(reshape(sta_var,height,width)',[])   % stim is rotated by 90 degree!
+    xlabel('y') %xlabel('x')         % swap x and y
+    ylabel('x') %ylabel('y')
+    title(sprintf('var STA across time'))
+    axis on xy
+
+    % mark the pixel with the largest variance 
+    [XX,YY]= meshgrid(1:height);  % grid for ploting
+
+    hold on;
+    %plot(XX(idxMax),YY(idxMax),'+r', 'markersize', 8, 'linewidth', 2)
+    plot(YY(idx_max),XX(idx_max),'+r', 'markersize', 8, 'linewidth', 2)
+
+
+    subplot(r,c,3)
+    plot(gridT, sta_max_var,'r')
+    xlabel('t')
+    ylabel('STA')
+    title('STA for the pixel with the largest variance')
+    box off
+    
+    %% analyze STC result
+    STC = stc{n}{idx_max,idx_max};   % choose STC of the target pixel
+    
+    [U, D, V ] = svd(STC);
+    ev = diag(D);
+
+    % match the sign of U to be consistent with sta_max_var
+    sgn = sign(U*sta_max_var);
+    UU=U*diag(sgn);
+    VV=diag(sgn)*V;
+    
+    
+    subplot(r,c,4)
+    imagesc(STC)
+    %colormap gray
+    box off
+    title('STC for the pixel with the largest variance')
+    
+    subplot(r,c,5)
+    plot(ev, 'ok'); hold on
+    plot(1, ev(1), 'b*')
+    plot(length(ev), ev(end), 'r*')   
+    box off
+    title ('eigen values')
+    
+    subplot(r,c,6)
+    %plot(eig(stc{max_idx(n),max_idx(n)}), 'o')
+    plot(UU(:,[1,end]))
+    box off
+    title ('eigen vectors')
+    
+    box off
+    
+    
+%     clf
+%     plot_STA_and_STC(sta{n}, stc{n}, gridT, width, height)
+    
+    
+    set(gcf, 'paperposition', [0 0 10 6])
+    set(gcf, 'papersize', [10 6])
+
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channelNames{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channelNames{n}))
+
+end
+
+
+
+
+
+
+%% Now, let's fit GLM!
+
 
 
 %% Set up basis for coupling filters
