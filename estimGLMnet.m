@@ -242,8 +242,8 @@ for n=1:size(spikeTrain,2)
 %     plot_STA_and_STC(sta{n}, stc{n}, gridT, width, height)
     
     
-    set(gcf, 'paperposition', [0 0 10 6])
-    set(gcf, 'papersize', [10 6])
+    set(gcf, 'paperposition', [0 0 11 5])
+    set(gcf, 'papersize', [11 5])
 
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channelNames{n}))
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channelNames{n}))
