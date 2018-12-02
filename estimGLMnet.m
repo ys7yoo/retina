@@ -143,7 +143,7 @@ STA_num_samples = 16;
 gridT = (-STA_num_samples+1:0)/fps;
 
 for n=1:size(spikeTrain,2)
-    %% calc STA and STC
+    %% calc STA
     [sta{n}, stc{n}] = calc_STA_and_STC(stim, spikeTrain(:,n), STA_num_samples);
     
     %% analyze STA (code from find_STA_with_max_var.m)
@@ -156,9 +156,15 @@ for n=1:size(spikeTrain,2)
     sta_max_var = sta{n}(:,idx_max);
     
     
+    % analyze nonlinearity!
+    [generator, firing_rate] =calc_nonlinearity(stim, spikeTrain(:,n), sta{n}, 16);
+    %[generator, firing_rate] =calc_nonlinearity(stim(:,idx_max), spikeTrain(:,n), sta{n}(:,idx_max), 16);
+    
+    
+    
     %% plot STA
     clf
-    r=2; c=3;     
+    r=2; c=4;     
     subplot(r,c,1)
     imshow(sta{n}')
     xlabel('t')
@@ -188,6 +194,16 @@ for n=1:size(spikeTrain,2)
     title('STA for the pixel with the largest variance')
     box off
     
+    % analyze nonlinearity!
+    subplot(r,c,4)
+    plot(generator, firing_rate, '.k')
+    xlabel('generator signal')
+    ylabel('spikes / bin')
+    box off
+    
+    
+    
+    
     %% analyze STC result
     STC = stc{n}{idx_max,idx_max};   % choose STC of the target pixel
     
@@ -200,20 +216,20 @@ for n=1:size(spikeTrain,2)
     VV=diag(sgn)*V;
     
     
-    subplot(r,c,4)
+    subplot(r,c,5)
     imagesc(STC)
     %colormap gray
     box off
     title('STC for the pixel with the largest variance')
     
-    subplot(r,c,5)
+    subplot(r,c,6)
     plot(ev, 'ok'); hold on
     plot(1, ev(1), 'b*')
     plot(length(ev), ev(end), 'r*')   
     box off
     title ('eigen values')
     
-    subplot(r,c,6)
+    subplot(r,c,7)
     %plot(eig(stc{max_idx(n),max_idx(n)}), 'o')
     plot(UU(:,[1,end]))
     box off
