@@ -143,8 +143,19 @@ STA_num_samples = 16;
 gridT = (-STA_num_samples+1:0)/fps;
 
 for n=1:size(spikeTrain,2)
+    
+    
+    
+    
     %% calc STA and STC
     [sta{n}, stc{n}] = calc_STA_and_STC(stim, spikeTrain(:,n), STA_num_samples);
+    
+    
+    %% calc range of STC eigen values
+    ev_range = calc_STC_eigenvalue_range(stim, spikeTrain(:,n), STA_num_samples, 50, [1 10]);
+
+    
+    
     
     %% analyze STA (code from find_STA_with_max_var.m)
     sta_var = var(sta{n},1);
@@ -208,8 +219,16 @@ for n=1:size(spikeTrain,2)
     
     subplot(r,c,5)
     plot(ev, 'ok'); hold on
-    plot(1, ev(1), 'b*')
-    plot(length(ev), ev(end), 'r*')   
+    %plot(1, ev(1), 'b*')
+    %plot(length(ev), ev(end), 'r*')   
+    
+    % plot range 
+    hold on
+    XLIM=get(gca,'xlim');
+    plot(XLIM, ev_range(1)*[1 1], 'r--')
+    plot(XLIM, ev_range(2)*[1 1], 'r--')
+    
+    
     box off
     title ('eigen values')
     
