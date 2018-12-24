@@ -81,8 +81,13 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
     ev_mean_global = mean(ev_mean);
     ev_var_global = mean(ev_var);
     ev_std = sqrt(ev_var_global);
+
+%     % 95% significance interval
+%     ev_range = ev_mean_global + ev_std*1.96*[-1 1];
     
-    ev_range = ev_mean_global + ev_std*1.96*[-1 1];
+    % 95% significance interval
+    ev_range = ev_mean_global + ev_std*2.54*[-1 1];
+    
     
     
     

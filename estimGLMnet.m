@@ -261,8 +261,11 @@ for n=1:size(spikeTrain,2)
 %     plot_STA_and_STC(sta{n}, stc{n}, gridT, width, height)
     
     
-    set(gcf, 'paperposition', [0 0 11 5])
-    set(gcf, 'papersize', [11 5])
+    set(gcf, 'paperposition', [0 0 20 24])
+    set(gcf, 'papersize', [20 24])
+    
+%     set(gcf, 'paperposition', [0 0 11 5])
+%     set(gcf, 'papersize', [11 5])
 
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channelNames{n}))
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channelNames{n}))
@@ -305,7 +308,7 @@ for n=1:size(spikeTrain,2)
     plot(evs(:,find(~is_significant_pixel)), ':', 'color', 0.5*[1 1 1]) 
     ylabel('eivenvalue')
     hold on
-    plot(evs(:,find(is_significant_pixel)), '--')        
+    plot(evs(:,find(is_significant_pixel)), '--.')        
     XLIM=get(gca,'xlim');
     plot(XLIM, ev_range(1)*[1 1], 'r--')
     plot(XLIM, ev_range(2)*[1 1], 'r--')
@@ -326,8 +329,8 @@ for n=1:size(spikeTrain,2)
     imagesc(reshape(evs(1,:),8,8)); colorbar; colormap gray; box off    
     %imagesc(reshape(evs(1,:),8,8), [ev_min ev_max]); colorbar; colormap gray; box off    
     hold on
-    plot(floor(idx_max_STC/8)+1, mod(idx_max_STC,8), 'or', 'markersize', 16, 'linewidth', 4)   
-    plot(floor(idx_max_STA/8)+1, mod(idx_max_STA,8), '+r', 'markersize', 8, 'linewidth', 2)
+    plot(floor((idx_max_STC-1)/8)+1, mod(idx_max_STC-1,8)+1, 'or', 'markersize', 12, 'linewidth', 3)   
+    plot(floor((idx_max_STA-1)/8)+1, mod(idx_max_STA-1,8)+1, '+r', 'markersize', 8, 'linewidth', 2)
     
     
     title('largest eiven values for each pixel')
@@ -336,28 +339,30 @@ for n=1:size(spikeTrain,2)
     imagesc(reshape(evs(end,:),8,8)); colorbar; colormap gray; box off
     %imagesc(reshape(evs(end,:),8,8), [ev_min ev_max]); colorbar; colormap gray; box off
     hold on
-    plot(floor(idx_min_STC/8)+1, mod(idx_min_STC,8), 'ob', 'markersize', 16, 'linewidth', 4)
-    plot(floor(idx_max_STA/8)+1, mod(idx_max_STA,8), '+r', 'markersize', 8, 'linewidth', 2)
+    plot(floor((idx_min_STC-1)/8)+1, mod(idx_min_STC-1,8)+1, 'ob', 'markersize', 12, 'linewidth', 3)   
+    plot(floor((idx_max_STA-1)/8)+1, mod(idx_max_STA-1,8)+1, '+r', 'markersize', 8, 'linewidth', 2)
     
     title('smallest eiven values for each pixel')
     
     subplot(r,c,5)
     plot(Us{idx_max_STC}(:,idx_significant_pixels{idx_max_STC}),'r')
     %plot(Us{idx_max_STC}(:,1),'r')
-    title('significant eigen vector(s) of the pixel with the largest eiven value')
+    title('significant eigen vector(s)') % of the pixel with the largest eiven value')
     set(gca,'ylim', [-1 1])
     box off
     
     subplot(r,c,6)
     plot(Us{idx_min_STC}(:,idx_significant_pixels{idx_min_STC}),'b')
     %plot(Us{idx_min_STC}(:,end),'b')
-    title('significant eigen vector(s) of the pixel with the smallest eiven value')
+    title('significant eigen vector(s)') % of the pixel with the smallest eiven value')
     set(gca,'ylim', [-1 1])
     box off
     
 
-    set(gcf, 'paperposition', [0 0 8 10])
-    set(gcf, 'papersize', [8 10])
+    set(gcf, 'paperposition', [0 0 20 24])
+    set(gcf, 'papersize', [20 24])
+%     set(gcf, 'paperposition', [0 0 8 10])
+%     set(gcf, 'papersize', [8 10])
     
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.pdf',CELL_TYPE, fps, channelNames{n}))
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.png',CELL_TYPE, fps, channelNames{n}))
