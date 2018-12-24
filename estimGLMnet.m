@@ -152,7 +152,7 @@ for n=1:size(spikeTrain,2)
     
     
     %% calc range of STC eigen values
-    ev_range = calc_STC_eigenvalue_range(stim, spikeTrain(:,n), STA_num_samples, 50, [1 10]);
+    ev_range = calc_STC_eigenvalue_range(stim, spikeTrain(:,n), STA_num_samples, 50, STA_num_samples*[10 50]);
 
     
     
@@ -161,15 +161,15 @@ for n=1:size(spikeTrain,2)
     sta_var = var(sta{n},1);
 
     % find pixel with the maximum variance in STA
-    [~, idx_max] = max(sta_var);
+    [~, idx_max_STA] = max(sta_var);
 
     % choose STA with maximum variance
-    sta_max_var = sta{n}(:,idx_max);
+    sta_max_var = sta{n}(:,idx_max_STA);
     
     
     % analyze nonlinearity!
     [generator, firing_rate] =calc_nonlinearity(stim, spikeTrain(:,n), sta{n}, 16);
-    %[generator, firing_rate] =calc_nonlinearity(stim(:,idx_max), spikeTrain(:,n), sta{n}(:,idx_max), 16);
+    %[generator, firing_rate] =calc_nonlinearity(stim(:,idx_max_STA), spikeTrain(:,n), sta{n}(:,idx_max_STA), 16);
     
     
     
@@ -195,7 +195,7 @@ for n=1:size(spikeTrain,2)
 
     hold on;
     %plot(XX(idxMax),YY(idxMax),'+r', 'markersize', 8, 'linewidth', 2)
-    plot(YY(idx_max),XX(idx_max),'+r', 'markersize', 8, 'linewidth', 2)
+    plot(YY(idx_max_STA),XX(idx_max_STA),'+r', 'markersize', 8, 'linewidth', 2)
 
 
     subplot(r,c,3)
@@ -216,7 +216,7 @@ for n=1:size(spikeTrain,2)
     
     
     %% analyze STC result
-    STC = stc{n}{idx_max,idx_max};   % choose STC of the target pixel
+    STC = stc{n}{idx_max_STA,idx_max_STA};   % choose STC of the target pixel
     
     [U, D, V ] = svd(STC);
     ev = diag(D);
@@ -266,8 +266,105 @@ for n=1:size(spikeTrain,2)
 
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channelNames{n}))
     saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channelNames{n}))
+    
+    %% analysis of STC for all pixels (2018.10.24)
+    num_pixels = size(stc{n},1);
+    is_significant_pixel = zeros(1,num_pixels);
+    clear idx_significant_pixels
+    clear Us
+    evs = [];
+    for i=1:num_pixels  % for each pixel 
+        % check eiven values out of the range 
+        
+        [U, D, V ] = svd(stc{n}{i,i});
+        ev = diag(D);
+    
+        % store all info
+        evs = [evs ev];
+        Us{i} = U; 
+            
+        
+        idx = find(ev < ev_range(1) | ev > ev_range(2));        
+        idx_significant_pixels{i} = idx;
+        
+        if ~isempty(idx)
+            is_significant_pixel(i) = true;
+        end
+    end
+    
+    num_significant_pixels = sum(is_significant_pixel);
+    disp(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channelNames{n}))
+    
+    [ev_max,idx_max_STC]=max(evs(1,:));
+    [ev_min,idx_min_STC]=min(evs(end,:));
+    
+    
+    clf
+    r=3;c=2;
+    subplot(r,c,1)
+    plot(evs(:,find(~is_significant_pixel)), ':', 'color', 0.5*[1 1 1]) 
+    ylabel('eivenvalue')
+    hold on
+    plot(evs(:,find(is_significant_pixel)), '--')        
+    XLIM=get(gca,'xlim');
+    plot(XLIM, ev_range(1)*[1 1], 'r--')
+    plot(XLIM, ev_range(2)*[1 1], 'r--')
+    box off
+    title(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channelNames{n}),'Interpreter', 'none')
+    
+    subplot(r,c,2)
+    hist(evs(:),32); hold on; 
+    ylabel('eivenvalue')
+    xlabel('count')
+    title ('histogram of eivenvalues')
+    YLIM=get(gca,'ylim');
+    plot(ev_range(1)*[1 1], YLIM, 'r--')
+    plot(ev_range(2)*[1 1], YLIM, 'r--')
+    box off
+    
+    subplot(r,c,3)
+    imagesc(reshape(evs(1,:),8,8)); colorbar; colormap gray; box off    
+    %imagesc(reshape(evs(1,:),8,8), [ev_min ev_max]); colorbar; colormap gray; box off    
+    hold on
+    plot(floor(idx_max_STC/8)+1, mod(idx_max_STC,8), 'or', 'markersize', 16, 'linewidth', 4)   
+    plot(floor(idx_max_STA/8)+1, mod(idx_max_STA,8), '+r', 'markersize', 8, 'linewidth', 2)
+    
+    
+    title('largest eiven values for each pixel')
+    
+    subplot(r,c,4)
+    imagesc(reshape(evs(end,:),8,8)); colorbar; colormap gray; box off
+    %imagesc(reshape(evs(end,:),8,8), [ev_min ev_max]); colorbar; colormap gray; box off
+    hold on
+    plot(floor(idx_min_STC/8)+1, mod(idx_min_STC,8), 'ob', 'markersize', 16, 'linewidth', 4)
+    plot(floor(idx_max_STA/8)+1, mod(idx_max_STA,8), '+r', 'markersize', 8, 'linewidth', 2)
+    
+    title('smallest eiven values for each pixel')
+    
+    subplot(r,c,5)
+    plot(Us{idx_max_STC}(:,idx_significant_pixels{idx_max_STC}),'r')
+    %plot(Us{idx_max_STC}(:,1),'r')
+    title('significant eigen vector(s) of the pixel with the largest eiven value')
+    set(gca,'ylim', [-1 1])
+    box off
+    
+    subplot(r,c,6)
+    plot(Us{idx_min_STC}(:,idx_significant_pixels{idx_min_STC}),'b')
+    %plot(Us{idx_min_STC}(:,end),'b')
+    title('significant eigen vector(s) of the pixel with the smallest eiven value')
+    set(gca,'ylim', [-1 1])
+    box off
+    
+
+    set(gcf, 'paperposition', [0 0 8 10])
+    set(gcf, 'papersize', [8 10])
+    
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.pdf',CELL_TYPE, fps, channelNames{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.png',CELL_TYPE, fps, channelNames{n}))
+    
 
 end
+
 
 
 

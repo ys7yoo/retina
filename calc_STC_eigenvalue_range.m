@@ -13,6 +13,10 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
     ev_min=[];
     ev_max=[];
     
+    ev_mean=[];
+    ev_var=[];
+    
+    
     for n=1:num_random_shift
         %% random shift
         random_shift = round(diff(random_shift_range) * rand(1)  + random_shift_range(1));
@@ -32,6 +36,11 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
                 % store max and min 
                 ev_max = [ev_max max(ev{i})];
                 ev_min = [ev_min min(ev{i})];
+                
+                ev_mean = [ev_mean mean(ev{i})];
+                ev_var = [ev_var var(ev{i})];
+                
+                
             end
         else
             [~, D, ~] = svd(stc);
@@ -40,11 +49,16 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
             % store max and min 
             ev_max = [ev_max max(ev{i})];
             ev_min = [ev_min min(ev{i})];
-                
+            
+            ev_mean = [ev_mean mean(ev{i})];
+            ev_var = [ev_var var(ev{i})];               
         end
         
         % store evs
-        evs{n} = ev;
+        if nargout>1
+            evs{n} = ev;    
+            % hist(reshape(cell2mat(evs{n}),[],1))
+        end
                         
     end
     
@@ -59,8 +73,18 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
     end
 
     
-    % calc range!
-    ev_range=[mean(ev_min) mean(ev_max)];
+%     % Option 1. calc range by min and max 
+%     ev_range=[mean(ev_min) mean(ev_max)];
+    
+    % Option 2. calc range by mean and var
+    
+    ev_mean_global = mean(ev_mean);
+    ev_var_global = mean(ev_var);
+    ev_std = sqrt(ev_var_global);
+    
+    ev_range = ev_mean_global + ev_std*1.96*[-1 1];
+    
+    
     
 return
 
@@ -117,4 +141,22 @@ title ('eigen values')
 
 
 box off
+    
+
+
+
+%% example plot (histogram of eiven values)
+
+close all
+hist(reshape(cell2mat(evs{1}),[],1)); box off;
+
+% set(gcf, 'paperposition', [0 0 6 3.5])
+% set(gcf, 'papersize', [6 3.5])
+
+set(gcf, 'paperposition', [0 0 8 6])
+set(gcf, 'papersize', [8 6])
+
+
+saveas(gcf, 'eigenvalue_histogram.png')
+saveas(gcf, 'eigenvalue_histogram.pdf')
     
