@@ -287,10 +287,12 @@ for n=1:size(spikeTrain,2)
         Us{i} = U; 
             
         
-        idx = find(ev < ev_range(1) | ev > ev_range(2));        
-        idx_significant_pixels{i} = idx;
+        idx_pos = find(ev > ev_range(2));        
+        idx_neg = find(ev < ev_range(1));        
+        idx_pos_significant_pixels{i} = idx_pos;
+        idx_neg_significant_pixels{i} = idx_neg;
         
-        if ~isempty(idx)
+        if ~isempty(idx_pos) | ~isempty(idx_neg)
             is_significant_pixel(i) = true;
         end
     end
@@ -345,14 +347,14 @@ for n=1:size(spikeTrain,2)
     title('smallest eiven values for each pixel')
     
     subplot(r,c,5)
-    plot(Us{idx_max_STC}(:,idx_significant_pixels{idx_max_STC}),'r')
+    plot(Us{idx_max_STC}(:,idx_pos_significant_pixels{idx_max_STC}),'r')
     %plot(Us{idx_max_STC}(:,1),'r')
     title('significant eigen vector(s)') % of the pixel with the largest eiven value')
     set(gca,'ylim', [-1 1])
     box off
     
     subplot(r,c,6)
-    plot(Us{idx_min_STC}(:,idx_significant_pixels{idx_min_STC}),'b')
+    plot(Us{idx_min_STC}(:,idx_neg_significant_pixels{idx_min_STC}),'b')
     %plot(Us{idx_min_STC}(:,end),'b')
     title('significant eigen vector(s)') % of the pixel with the smallest eiven value')
     set(gca,'ylim', [-1 1])
@@ -372,7 +374,54 @@ end
 
 
 
+%% calc and plot RF from STA (2019. 1. 4)
+addpath tools
+clear RFs;
+for n=1:length(sta)
+    %% 
+    disp(sprintf('processing %s...',channelNames{n}))
+    clf
+    
+    [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(sta{n},8,8);
+    
+    set(gcf, 'paperposition', [0 0 24 18])
+    set(gcf, 'papersize', [24 18])
 
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channelNames{n}))
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channelNames{n}))
+    
+    % saves the largest RF from each cell
+    RFs{n} = largest_RF
+    
+end
+
+
+
+%% plot mosaic
+
+clf; hold on
+for n=1:length(RFs)
+    switch RFs{n}.type
+        case 'ON'
+            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'r-');
+        case 'OFF'
+            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'b-');
+    end
+end
+xlabel('x')
+ylabel('y')
+title('Receptive field mosaic')
+axis ([0 9 0 9])
+
+set(gcf, 'paperposition', [0 0 24 20])
+set(gcf, 'papersize', [24 20])
+
+saveas(gcf, sprintf('mosaic.png'))
+saveas(gcf, sprintf('mosaic.pdf'))
+
+
+% saveas(gcf, sprintf('mosaic_%s.png',channelNames{n}))
+% saveas(gcf, sprintf('mosaic_%s.pdf',channelNames{n}))
 
 
 
