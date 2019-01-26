@@ -19,7 +19,7 @@ clear
 
 
 
-loadDataNet 
+load_data_13x13 % 13x13 stim
 
 
 % % %% First, run STA independently for all the channels 
