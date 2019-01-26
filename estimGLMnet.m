@@ -16,17 +16,7 @@ addpath([basedir '/glmtools_spline/']);
 %% load data! 
 
 clear
-% load 20180828_GLM_CouplingFilter_SameRGCtype 
-CELL_TYPE = input('Cell type? (ON or OFF) ' ,'s')
-fps = input('frame per second? (10 or 25) ')
 
-%NUM_SET = input('Set number? ')
-%CELL_TYPE = 'ON'
-%NUM_SET = 1
-% NUM_SET = 2
-% NUM_SET = 3
-% NUM_SET = 4
-% NUM_SET = 5
 
 
 loadDataNet 
