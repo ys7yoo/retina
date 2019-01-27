@@ -133,9 +133,9 @@ close all
 %clear STA_max_var, max_idx
 
 % sta params
-%STA_num_samples = 16;
-STA_num_samples = 10; % for 30Hz
-gridT = (-STA_num_samples+1:0)/fps;
+%sta_num_samples = 16;
+sta_num_samples = 10; % for 30Hz
+gridT = (-sta_num_samples+1:0)/fps;
 
 
 %channels_to_analyze = 1:length(channel_names);
@@ -149,7 +149,7 @@ for n=1:length(channel_names)
     disp(channel_names{n})
     
     % calc STA and STC
-    [sta_all_channels{n}] = calc_STA_and_STC(stim, spike_train(:,n), STA_num_samples);
+    [sta_all_channels{n}] = calc_STA_and_STC(stim, spike_train(:,n), sta_num_samples);
     
 end
 toc
@@ -158,7 +158,10 @@ toc
 %% lanch app to analyze individual channels and 
 % decide which channels to analyze further
 
+addpath app
+sta_app
 
+%%
 % ON cells: ch13c, ch37c, 58b, ch75d, ch77d
 % OFF cells: ch16b, 26a, 27a, 37b, 47b
 
@@ -253,11 +256,11 @@ for n=1:length(channel_names)
     
     
     %% calc STA and STC
-    [sta_all_channels{n}, stc{n}] = calc_STA_and_STC(stim, spike_train(:,n), STA_num_samples);
+    [sta_all_channels{n}, stc{n}] = calc_STA_and_STC(stim, spike_train(:,n), sta_num_samples);
     
     
     %% calc range of STC eigen values
-    ev_range = calc_STC_eigenvalue_range(stim, spike_train(:,n), STA_num_samples, 50, STA_num_samples*[10 50]);
+    ev_range = calc_STC_eigenvalue_range(stim, spike_train(:,n), sta_num_samples, 50, sta_num_samples*[10 50]);
 
     
     
