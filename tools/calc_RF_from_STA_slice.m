@@ -41,8 +41,8 @@ c=5;
 r=ceil(T/c);
 cnt=1;
 
-max_val = max(STA(:));
-min_val = min(STA(:));
+% max_val = max(STA(:));
+% min_val = min(STA(:));
 
 pos_RF = [];
 neg_RF = [];
