@@ -158,7 +158,7 @@ toc
 %% lanch app to analyze individual channels and 
 % decide which channels to analyze further
 
-addpath app
+addpath tools
 sta_app
 
 %%
@@ -247,6 +247,17 @@ set(gcf, 'papersize', [24 20])
 
 saveas(gcf, sprintf('mosaic.png'))
 saveas(gcf, sprintf('mosaic.pdf'))
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CLEANED UP UPTO THIS POINT (2019. 1.27)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+return 
+
 
 
 
