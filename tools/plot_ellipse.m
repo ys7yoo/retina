@@ -6,6 +6,11 @@ function eigenval = plot_ellipse(avg, covariance, LINE_TYPE)
 
 eigenval = diag(eigenval);
 
+
+if sum(eigenval) == 0
+    return
+end
+
 % Get the index of the largest eigenvector
 [~, largest_eigenvec_ind_c] = max(eigenval); 
 %[largest_eigenvec_ind_c, r] = find(eigenval == max(max(eigenval)));

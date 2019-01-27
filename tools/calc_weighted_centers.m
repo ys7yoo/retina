@@ -1,10 +1,12 @@
-function [center_pos, cov_pos, center_neg, cov_neg] = calc_weighted_centers(slice, X, Y, threshold)
+function [center_pos, cov_pos, num_pos_pixels, center_neg, cov_neg, num_neg_pixels] = calc_weighted_centers(slice, X, Y, threshold)
 
 ref_value = 0.5;
 
 positive_values=max(slice - ref_value-threshold,0);
 negative_values=max(ref_value-slice-threshold,0);
 
+num_pos_pixels =  sum(positive_values>0);
+num_neg_pixels =  sum(negative_values>0);
 
 [XX, YY] = meshgrid(1:X,1:Y);
 % XX=XX(:);
