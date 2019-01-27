@@ -1,22 +1,13 @@
-% load 20180828_GLM_CouplingFilter_SameRGCtype 
-CELL_TYPE = input('Cell type? (ON or OFF) ' ,'s')
-fps = input('frame per second? (10 or 25) ')
 
-%NUM_SET = input('Set number? ')
-%CELL_TYPE = 'ON'
-%NUM_SET = 1
-% NUM_SET = 2
-% NUM_SET = 3
-% NUM_SET = 4
-% NUM_SET = 5
-%% Choose set to load
+
+%% load 26x26 stim results from 20180905_26x26
 
 % data in 20180828_GLM_CouplingFilter_SameRGCtype
-base_folder_name = 'data/20180828_GLM_CouplingFilter_SameRGCtype';
+base_folder_name = 'data/20180905_26x26';
 
-% 10 Hz or 25 Hz data
-StimInfoFileName = fullfile(base_folder_name, sprintf('StimInfo_8pix_163um_%dHz.mat',fps))
-SpikeTrainFolderName = fullfile(base_folder_name, sprintf('SpikeTrain_20180828/%scell/%dHz/', CELL_TYPE, fps))
+fps = 30
+StimInfoFileName = fullfile(base_folder_name, sprintf('StimInfo_26pix_50um_%dHz.mat',fps))
+SpikeTrainFolderName = fullfile(base_folder_name, sprintf('SpikeTrain_20180905/SpikeTrain_ND2_26pix_50um_%dHz/', fps))
 
 
 % % data in 20180820
@@ -28,7 +19,7 @@ SpikeTrainFolderName = fullfile(base_folder_name, sprintf('SpikeTrain_20180828/%
 % StimInfoFileName = '20180724/StimInfo_8pix_200um_10Hz.mat'
 % SpikeTrainFolderName = sprintf('20180724/SpikeTrain_20180724/%scell/set%d/', CELL_TYPE, NUM_SET)
 
-height=8,width=8
+height=26,width=26
 
         
 dtStim = 1 / fps;
@@ -44,7 +35,8 @@ stim = cell2mat(StimInfo);
 %stim = reshape(stim, [T, height, width]);
 % rearrange order
 %stim = permute(stim, [2 3 1]);
-size(stim)
+size(stim)                       % 27000         676
+
 
 % plot some sample stimulus
 clf
