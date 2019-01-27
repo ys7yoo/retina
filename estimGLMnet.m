@@ -173,6 +173,7 @@ sta_app
 
 % better way to call
 selected_channel_names = {'13c', '37c', '58b', '75d', '77d', '16b', '26a', '27a', '37b', '47b'}
+addpath tools
 channel_index_to_analyze = calc_channel_index(channel_names, selected_channel_names)
 
 
