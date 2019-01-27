@@ -1,6 +1,7 @@
-function [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(STA, X, Y)
+function [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(STA, X, Y, fps)
 
 [T, num_pixels] = size(STA);
+gridT = (-T+1:0)/fps;
 
 [YY, XX] = meshgrid(1:X,1:Y);
 XX=XX(:);
@@ -61,7 +62,8 @@ for t=1:T
         neg_RF{cnt_neg_RF}.eig= sum(eig_values); % size of RF
     end
     
-    title (sprintf('time bin %d',t))
+    %title (sprintf('time bin %d',t))
+    title (sprintf('%.0f ms', gridT(t)*1000))
     
     
     %% Store largest mean and cov of largest RF
