@@ -1,4 +1,4 @@
-function [sta, stc, gridT] = calc_STA_and_STC(Stim, spike_train, n)
+function [sta, stc] = calc_STA_and_STC(Stim, spike_train, n)
 
 % input:
 %       Stim = (time) x (space)
@@ -10,27 +10,27 @@ dim = size(Stim,2);     % dimension of the stimulus
 spike_train(1:n-1,:) = 0;  % Ignore spikes before time n
 
 % Compute spike-triggered STA and STC
-idx_spike = find(spike_train>0);
+spike_idx = find(spike_train>0);
 
-spikes = spike_train(idx_spike);
-num_spikes = sum(spikes);
+spikes = spike_train(spike_idx);
+num_total_spikes = sum(spikes);
 
 
 % construct desing matrix
-SS = makeStimRows(Stim, n, idx_spike);
+SS = makeStimRows(Stim, n, spike_idx);
 
 
 %% calc STA
-sta = (spikes'*SS)'/num_spikes;
+sta = (spikes'*SS)'/num_total_spikes;
 
 
 %% calc STC
 if nargout > 1
 
     %% calc STC
-    stc = SS'*bsxfun(@times, SS, spikes)/(num_spikes-1) - sta*sta'*num_spikes/(num_spikes-1);
+    stc = SS'*bsxfun(@times, SS, spikes)/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
     %rowlen = size(SS,2);
-    %stc = SS'*(SS.*repmat(spikes,1,rowlen))/(num_spikes-1) - sta*sta'*num_spikes/(num_spikes-1);
+    %stc = SS'*(SS.*repmat(spikes,1,rowlen))/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
     
 end
 
