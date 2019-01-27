@@ -19,7 +19,11 @@ clear
 
 
 
-load_data_13x13 % 13x13 stim
+% for loading 13x13 stim (20180828)
+% load_data_13x13 
+
+% for loading 26x26 stim (20180905)
+load_data_26x26 
 
 
 % % %% First, run STA independently for all the channels 
@@ -32,12 +36,12 @@ load_data_13x13 % 13x13 stim
 % % clear STAall
 % % clear STAs  % STAs will be stored here
 % % 
-% % for i = 1:length(channelNames)
+% % for i = 1:length(channel_names)
 % %     
-% %     channelName = channelNames{i}
-% %     spikeTime=eval(channelName);
+% %     channel_name = channel_names{i}
+% %     spike_time=eval(channel_name);
 % %     
-% %     [STA, gridT] = calcSTAprestim(stim, A1a, spikeTime, W, fps);
+% %     [STA, gridT] = calcSTAprestim(stim, A1a, spike_time, W, fps);
 % %     %save STA
 % %     STAall{i} = STA;
 % % 
@@ -52,7 +56,7 @@ load_data_13x13 % 13x13 stim
 % %     set(gcf, 'paperposition', [0 0 12 10])
 % %     set(gcf, 'papersize', [12 10])
 % % 
-% %     saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channelName))
+% %     saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channel_name))
 % %     
 % % end
 % % 
@@ -64,7 +68,7 @@ load_data_13x13 % 13x13 stim
 % % title('STAs with the largest variance')
 % % box off
 % % 
-% % legend(channelNames, 'location', 'NW','Interpreter', 'none'); legend boxoff
+% % legend(channel_names, 'location', 'NW','Interpreter', 'none'); legend boxoff
 % % 
 % % 
 % % set(gcf, 'paperposition', [0 0 6 4])
@@ -76,16 +80,16 @@ load_data_13x13 % 13x13 stim
 
 %% For further analysis, need to convert spike time to spike train
 
-N = length(channelNames); % number of neurons 
+N = length(channel_names); % number of neurons 
 
 binStim = size(stim,1);
 assert (binStim==length(A1a))
-spikeTrain = zeros(binStim,N);
+spike_train = zeros(binStim,N);
 
 for n = 1:N
     
-    channelName = channelNames{n}
-    spikeTime=eval(channelName);
+    channel_name = channel_names{n}
+    spike_time=eval(channel_name);
     
     
     % let's check for each stim time bin
@@ -94,11 +98,11 @@ for n = 1:N
         t1 = A1a(i);
 
         % find stim time that occured during t0 and t1
-        idx = find(spikeTime>t0 & spikeTime<=t1);
+        idx = find(spike_time>t0 & spike_time<=t1);
 
         if ~isempty(idx)
             %disp('found')
-            spikeTrain(i,n) = 1;
+            spike_train(i,n) = 1;
         end
 
     end
@@ -106,20 +110,20 @@ end
 
 
 clf
-imagesc(spikeTrain', [0 1]); colormap gray
+imagesc(spike_train', [0 1]); colormap gray
 
 % % Simple code below does NOT work due to time jitter!!!
-% % grab spikeTime during stim & convert to bin idx
-% idx = (spikeTime >= A1a(1)) & (spikeTime < A1a(end));
-% binIdx = round(spikeTime(idx)*fps);  
-% %idx = ceil(spikeTime*fps) % does it matter?
-% spikeTrain(binIdx) = 1;
-% spikeTrain = spikeTrain(:);
+% % grab spike_time during stim & convert to bin idx
+% idx = (spike_time >= A1a(1)) & (spike_time < A1a(end));
+% binIdx = round(spike_time(idx)*fps);  
+% %idx = ceil(spike_time*fps) % does it matter?
+% spike_train(binIdx) = 1;
+% spike_train = spike_train(:);
 % 
 % % cut spike train length to be the same as stim time length
 % T = size(StimChosen,1);
-% if length(spikeTrain) > T
-%     spikeTrain = spikeTrain(1:T);
+% if length(spike_train) > T
+%     spike_train = spike_train(1:T);
 % end
 
 
@@ -129,37 +133,60 @@ close all
 %clear STA_max_var, max_idx
 
 % sta params
-STA_num_samples = 16;
+%STA_num_samples = 16;
+STA_num_samples = 15; % for 30Hz
 gridT = (-STA_num_samples+1:0)/fps;
 
-for n=1:size(spikeTrain,2)
+
+%channels_to_analyze = 1:length(channel_names);
+%channels_to_analyze = 8;
+%% 1. calc STA first (STC is too slow)
+
+disp('running STA for all the channels...')
+tic
+for n=1:length(channel_names)
+    
+    disp(channel_names{n})
+    
+    % calc STA and STC
+    [sta_all_channels{n}] = calc_STA_and_STC(stim, spike_train(:,n), STA_num_samples);
+    
+end
+toc
+
+
+%% lanch app to analyze individual channel
+
+
+%% 2. calc STC
+for n=1:length(channel_names)
     
     
     
     
     %% calc STA and STC
-    [sta{n}, stc{n}] = calc_STA_and_STC(stim, spikeTrain(:,n), STA_num_samples);
+    [sta_all_channels{n}, stc{n}] = calc_STA_and_STC(stim, spike_train(:,n), STA_num_samples);
     
     
     %% calc range of STC eigen values
-    ev_range = calc_STC_eigenvalue_range(stim, spikeTrain(:,n), STA_num_samples, 50, STA_num_samples*[10 50]);
+    ev_range = calc_STC_eigenvalue_range(stim, spike_train(:,n), STA_num_samples, 50, STA_num_samples*[10 50]);
 
     
     
     
     %% analyze STA (code from find_STA_with_max_var.m)
-    sta_var = var(sta{n},1);
+    sta_var = var(sta_all_channels{n},1);
 
     % find pixel with the maximum variance in STA
     [~, idx_max_STA] = max(sta_var);
 
     % choose STA with maximum variance
-    sta_max_var = sta{n}(:,idx_max_STA);
+    sta_max_var = sta_all_channels{n}(:,idx_max_STA);
     
     
     % analyze nonlinearity!
-    [generator, firing_rate] =calc_nonlinearity(stim, spikeTrain(:,n), sta{n}, 16);
-    %[generator, firing_rate] =calc_nonlinearity(stim(:,idx_max_STA), spikeTrain(:,n), sta{n}(:,idx_max_STA), 16);
+    [generator, firing_rate] =calc_nonlinearity(stim, spike_train(:,n), sta_all_channels{n}, 16);
+    %[generator, firing_rate] =calc_nonlinearity(stim(:,idx_max_STA), spike_train(:,n), sta_all_channels{n}(:,idx_max_STA), 16);
     
     
     
@@ -167,7 +194,7 @@ for n=1:size(spikeTrain,2)
     clf
     r=2; c=4;     
     subplot(r,c,1)
-    imshow(sta{n}')
+    imshow(sta_all_channels{n}')
     xlabel('t')
     ylabel('pixel')
     title('STA')
@@ -248,7 +275,7 @@ for n=1:size(spikeTrain,2)
     
     
 %     clf
-%     plot_STA_and_STC(sta{n}, stc{n}, gridT, width, height)
+%     plot_STA_and_STC(sta_all_channels{n}, stc{n}, gridT, width, height)
     
     
     set(gcf, 'paperposition', [0 0 20 24])
@@ -257,8 +284,8 @@ for n=1:size(spikeTrain,2)
 %     set(gcf, 'paperposition', [0 0 11 5])
 %     set(gcf, 'papersize', [11 5])
 
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channelNames{n}))
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channelNames{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channel_names{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channel_names{n}))
     
     %% analysis of STC for all pixels (2018.10.24)
     num_pixels = size(stc{n},1);
@@ -288,7 +315,7 @@ for n=1:size(spikeTrain,2)
     end
     
     num_significant_pixels = sum(is_significant_pixel);
-    disp(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channelNames{n}))
+    disp(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channel_names{n}))
     
     [ev_max,idx_max_STC]=max(evs(1,:));
     [ev_min,idx_min_STC]=min(evs(end,:));
@@ -305,7 +332,7 @@ for n=1:size(spikeTrain,2)
     plot(XLIM, ev_range(1)*[1 1], 'r--')
     plot(XLIM, ev_range(2)*[1 1], 'r--')
     box off
-    title(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channelNames{n}),'Interpreter', 'none')
+    title(sprintf('eigen values are significant in %d pixels in %s',num_significant_pixels,channel_names{n}),'Interpreter', 'none')
     
     subplot(r,c,2)
     hist(evs(:),32); hold on; 
@@ -356,8 +383,8 @@ for n=1:size(spikeTrain,2)
 %     set(gcf, 'paperposition', [0 0 8 10])
 %     set(gcf, 'papersize', [8 10])
     
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.pdf',CELL_TYPE, fps, channelNames{n}))
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.png',CELL_TYPE, fps, channelNames{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.pdf',CELL_TYPE, fps, channel_names{n}))
+    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC_all_pixels.png',CELL_TYPE, fps, channel_names{n}))
     
 
 end
@@ -369,16 +396,16 @@ addpath tools
 clear RFs;
 for n=1:length(sta)
     %% 
-    disp(sprintf('processing %s...',channelNames{n}))
+    disp(sprintf('processing %s...',channel_names{n}))
     clf
     
-    [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(sta{n},8,8);
+    [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, height, width, fps);
     
     set(gcf, 'paperposition', [0 0 24 18])
     set(gcf, 'papersize', [24 18])
 
-    saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channelNames{n}))
-    saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channelNames{n}))
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channel_names{n}))
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channel_names{n}))
     
     % saves the largest RF from each cell
     RFs{n} = largest_RF
@@ -410,8 +437,8 @@ saveas(gcf, sprintf('mosaic.png'))
 saveas(gcf, sprintf('mosaic.pdf'))
 
 
-% saveas(gcf, sprintf('mosaic_%s.png',channelNames{n}))
-% saveas(gcf, sprintf('mosaic_%s.pdf',channelNames{n}))
+% saveas(gcf, sprintf('mosaic_%s.png',channel_names{n}))
+% saveas(gcf, sprintf('mosaic_%s.pdf',channel_names{n}))
 
 
 
@@ -549,8 +576,8 @@ ggInit.ihw2 = zeros(nhbasis2,N-1); % init params for cross-coupling filter
 ggInit.ih = [ggInit.ihbas*ggInit.ihw ggInit.ihbas2*ggInit.ihw2];
 ggInit.iht = iht;
 ggInit.dc = 0; % Initialize dc term to zero
-ggInit.sps = spikeTrain(:,1); % spikes from 1 cell
-ggInit.sps2 = spikeTrain(:,2:N); % spikes from all 
+ggInit.sps = spike_train(:,1); % spikes from 1 cell
+ggInit.sps2 = spike_train(:,2:N); % spikes from all 
 ggInit.couplednums = 2:N; % cell numbers of cells coupled to this one 
 
 
@@ -561,8 +588,8 @@ for jj = 1:N
     couplednums = setdiff(1:N,jj);  % cell numbers of cells coupled to this one (jj)
 
     % Set spike responses for this cell (jj) and coupled cells
-    ggInit.sps = spikeTrain(:,jj);
-    ggInit.sps2 = spikeTrain(:,couplednums);
+    ggInit.sps = spike_train(:,jj);
+    ggInit.sps2 = spike_train(:,couplednums);
     ggInit.couplednums = couplednums; % numbers of cells coupled to this one (for clarity)
 
     % Do ML fitting
@@ -579,9 +606,9 @@ clf;colormap gray
 for n=1:N
     %%
     subplot(2,N,n);imagesc(STAall{n}');  ylabel('pixel'); xlabel('time bin');
-    title(sprintf('STA (%s)', channelNames{n}),'Interpreter', 'none')
+    title(sprintf('STA (%s)', channel_names{n}),'Interpreter', 'none')
     subplot(2,N,n+N);imagesc(ggfit(n).k'); ylabel('pixel'); xlabel('time bin')
-    title(sprintf('k by GLM (%s)', channelNames{n}),'Interpreter', 'none')
+    title(sprintf('k by GLM (%s)', channel_names{n}),'Interpreter', 'none')
 end
 set(gcf, 'paperposition', [0 0 8 8])
 set(gcf, 'papersize', [8 8])
@@ -613,7 +640,7 @@ for jj = 1:N
     subplot(num_row,num_col,jj); 
     plot(ggfit(jj).iht, exp(ggfit(jj).ih(:,1)), '--k', 'linewidth', 2); hold on
     plot(ggfit(jj).iht, exp(ggfit(jj).ih(:,2:ncolrs)), '-', 'linewidth', 2); % estim
-    title(sprintf(' cell %s',channelNames{jj}(4:end) )); axis tight; set(gca,'ylim',[0,ymax]);
+    title(sprintf(' cell %s',channel_names{jj}(4:end) )); axis tight; set(gca,'ylim',[0,ymax]);
     box off
     
     if jj==1 || jj==4 || jj ==7
