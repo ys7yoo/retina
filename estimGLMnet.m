@@ -134,7 +134,7 @@ close all
 
 % sta params
 %STA_num_samples = 16;
-STA_num_samples = 15; % for 30Hz
+STA_num_samples = 10; % for 30Hz
 gridT = (-STA_num_samples+1:0)/fps;
 
 
@@ -155,10 +155,98 @@ end
 toc
 
 
-%% lanch app to analyze individual channel
+%% lanch app to analyze individual channels and 
+% decide which channels to analyze further
 
 
-%% 2. calc STC
+% ON cells: ch13c, ch37c, 58b, ch75d, ch77d
+% OFF cells: ch16b, 26a, 27a, 37b, 47b
+
+%channel_index_to_analyze = [8, 40, 63, 95] % ON 
+%channel_index_to_analyze = [11, 22, 25, 39, 51] % OFF
+
+% combined 
+%channel_index_to_analyze = [8, 40, 63, 95, 11, 22, 25, 39, 51] % OFF
+
+% better way to call
+selected_channel_names = {'13c', '37c', '58b', '75d', '77d', '16b', '26a', '27a', '37b', '47b'}
+channel_index_to_analyze = calc_channel_index(channel_names, selected_channel_names)
+
+
+
+%% calc and plot RF from STA (2019. 1. 27)
+addpath tools
+clear RFs;
+%for n=1:length(sta_all_channels)
+cnt = 1;
+for n = channel_index_to_analyze
+    %% 
+    disp(sprintf('processing %s...',channel_names{n}))
+    
+    
+    %% pre-processing 
+    clf
+    hist(sta_all_channels{n}(:))
+    sig = std(sta_all_channels{n}(:));
+    ylim = get(gca,'ylim');
+    hold on;plot(0.5+2.58*sig*[1 1], ylim, 'r--');plot(0.5-2.58*sig*[1 1], ylim, 'r--')
+    box off
+    %title(sprintf('histogram of STA (\\sigma=%.2f)', sig))
+    %sta_all_channels{n}
+    
+    %% plot outside of m+- sig
+    
+    
+    %%
+    clf
+    
+    
+    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, height, width, fps);
+    strongest_RF.channel_name = channel_names{n};
+    set(gcf, 'paperposition', [0 0 24 9])
+    set(gcf, 'papersize', [24 9])
+
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channel_names{n}))
+    saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channel_names{n}))
+    
+    % saves the largest RF from each cell
+    RFs{cnt} = strongest_RF;
+    cnt = cnt + 1;
+    
+end
+
+
+
+%% plot mosaic
+
+clf; hold on
+for n=1:length(RFs)
+    switch RFs{n}.type
+        case 'ON'
+            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'r-');
+            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center');
+            tt.Color = [1 0 0];
+        case 'OFF'
+            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'b-');
+            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center')
+            tt.Color = [0 0 1];
+    end
+end
+xlabel('x')
+ylabel('y')
+title('Receptive field mosaic')
+axis image
+axis ([1 width 1 height])
+
+set(gcf, 'paperposition', [0 0 24 20])
+set(gcf, 'papersize', [24 20])
+
+saveas(gcf, sprintf('mosaic.png'))
+saveas(gcf, sprintf('mosaic.pdf'))
+
+
+
+%% 2. calc STA & STC
 for n=1:length(channel_names)
     
     
@@ -391,50 +479,7 @@ end
 
 
 
-%% calc and plot RF from STA (2019. 1. 4)
-addpath tools
-clear RFs;
-for n=1:length(sta)
-    %% 
-    disp(sprintf('processing %s...',channel_names{n}))
-    clf
-    
-    [pos_RF, neg_RF, largest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, height, width, fps);
-    
-    set(gcf, 'paperposition', [0 0 24 18])
-    set(gcf, 'papersize', [24 18])
 
-    saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channel_names{n}))
-    saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channel_names{n}))
-    
-    % saves the largest RF from each cell
-    RFs{n} = largest_RF
-    
-end
-
-
-
-%% plot mosaic
-
-clf; hold on
-for n=1:length(RFs)
-    switch RFs{n}.type
-        case 'ON'
-            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'r-');
-        case 'OFF'
-            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'b-');
-    end
-end
-xlabel('x')
-ylabel('y')
-title('Receptive field mosaic')
-axis ([0 9 0 9])
-
-set(gcf, 'paperposition', [0 0 24 20])
-set(gcf, 'papersize', [24 20])
-
-saveas(gcf, sprintf('mosaic.png'))
-saveas(gcf, sprintf('mosaic.pdf'))
 
 
 % saveas(gcf, sprintf('mosaic_%s.png',channel_names{n}))
