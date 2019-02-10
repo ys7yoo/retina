@@ -406,12 +406,12 @@ end
 
 
 
-%% compare variances
-figure()
-plot(sta_RF_var, us_var, 'o')
-xlabel('var(STA)')
-ylabel('var(STC)')
-box off
+% % %% compare variances
+% % figure()
+% % plot(sta_RF_var, us_var, 'o')
+% % xlabel('var(STA)')
+% % ylabel('var(STC)')
+% % box off
 
 
 
