@@ -1,6 +1,26 @@
-function eigenval = plot_ellipse(avg, covariance, LINE_TYPE)
+function plot_ellipse(avg, covariance, LINE_TYPE)
 
-% modified code from http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
+if nargin<3
+    LINE_TYPE = 'r--';
+end
+
+%% simpler version based on linear algebra
+
+%% new function for plot 
+theta = linspace(0,2*pi);
+
+circ = [cos(theta') sin(theta')];
+
+ellipse = avg + circ*chol(covariance)*diag([2.4477, 2.4477]);
+
+
+%plot(circ(:,1), circ(:,2), 'k--'); hold on
+plot(ellipse(:,1), ellipse(:,2), LINE_TYPE); 
+
+
+return
+
+%% modified code from http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
 
 [eigenvec, eigenval ] = eig(covariance);
 

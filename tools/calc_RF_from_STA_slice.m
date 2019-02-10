@@ -64,10 +64,13 @@ for t=1:T
     
     %% Step 3. plot ellipses (95% significant)
     if sum(isnan(pos_center))==0
-        %plot(pos_center(1), pos_center(2), '+r', 'markersize', 5)
-        eig_values=plot_ellipse(pos_center, pos_cov, 'r-');
+        eig_values = eig(pos_cov);
         
-        if sum(eig_values) > 0
+        if sum(eig_values>0) == 2
+            %plot(pos_center(1), pos_center(2), '+r', 'markersize', 5)
+            plot_ellipse(pos_center, pos_cov, 'r-');
+        
+            
             cnt_pos_RF = cnt_pos_RF + 1;
         
             pos_RFs{cnt_pos_RF}.mean= pos_center;
@@ -84,10 +87,12 @@ for t=1:T
         
     end
     if sum(isnan(neg_center))==0
-        %plot(neg_center(1), neg_center(2), '+b', 'markersize', 5)
-        eig_values=plot_ellipse(neg_center, neg_cov, 'b-');
+        eig_values = eig(neg_cov);
      
-        if sum(eig_values) > 0 
+        if sum(eig_values>0) == 2
+            %plot(neg_center(1), neg_center(2), '+b', 'markersize', 5)
+            plot_ellipse(neg_center, neg_cov, 'b-');
+        
             cnt_neg_RF = cnt_neg_RF + 1;
 
             neg_RFs{cnt_neg_RF}.mean= neg_center;

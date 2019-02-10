@@ -28,7 +28,13 @@ sta = (spikes'*SS)'/num_total_spikes;
 if nargout > 1
 
     %% calc STC
-    stc = SS'*bsxfun(@times, SS, spikes)/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
+    % implementation 1 (when spikes are either 1 or 0, Matlab cov function is faster!
+    stc = cov(SS);
+    
+    % implementation 2
+    % stc = SS'*bsxfun(@times, SS, spikes)/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
+    
+    % implementation 3
     %rowlen = size(SS,2);
     %stc = SS'*(SS.*repmat(spikes,1,rowlen))/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
     
@@ -38,19 +44,18 @@ end
 if dim ~= 1
     sta = reshape(sta, n, dim);
     
-    if nargout > 1
-        if dim ~= 1
-            %% unpack STC into nxn blocks
-            for i=1:dim
-                for j=1:dim
-                    STC{i,j} = stc(n*(i-1)+1:n*i, n*(j-1)+1:n*j);
-                end
-            end
-            
-            stc= STC;
-        end
-
-    end
+% %     if nargout > 1
+% %         if dim ~= 1
+% %             % unpack STC into nxn blocks
+% %             for i=1:dim
+% %                 for j=i:dim
+% %                     STC{i,j} = stc(n*(i-1)+1:n*i, n*(j-1)+1:n*j);
+% %                     STC{j,i} = STC{i,j};
+% %                 end
+% %             end
+% %             stc= STC;
+% %         end
+% %     end
 end
 
 
@@ -84,12 +89,12 @@ function S= makeStimRows(Stim, n, flag)
 % parse inputs
 if nargin < 3
     flag = 0;
-    if nargin < 2
-        global n
-        if isempty(n)
-            error('ERROR -- makeStimRows:  n is undefined');
-        end
-    end
+%     if nargin < 2
+%         global n
+%         if isempty(n)
+%             error('ERROR -- makeStimRows:  n is undefined');
+%         end
+%     end
 end
 
 sz = size(Stim);

@@ -18,6 +18,7 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
     
     
     for n=1:num_random_shift
+        disp('.')
         %% random shift
         random_shift = round(diff(random_shift_range) * rand(1)  + random_shift_range(1));
     
@@ -30,7 +31,7 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
         %% analyze STC result
         if iscell(stc)
             for i=1:size(stc,1)
-                [~, D, ~] = svd(stc{i,i});
+                [~, D, ~] = svd(stc{i});
                 ev{i} = diag(D);
                 
                 % store max and min 
@@ -43,15 +44,19 @@ function  [ev_range, evs, stc, sta] = calc_STC_eigenvalue_range(stim, spikeTrain
                 
             end
         else
-            [~, D, ~] = svd(stc);
-            ev = diag(D);
+            ev = eig(stc);
+            
+            ev = ev(ev>1e-5);
+%             [~, D, ~] = svd(stc);
+%             ev = diag(D);
+
             
             % store max and min 
-            ev_max = [ev_max max(ev{i})];
-            ev_min = [ev_min min(ev{i})];
+            ev_max = [ev_max max(ev)];
+            ev_min = [ev_min min(ev)];
             
-            ev_mean = [ev_mean mean(ev{i})];
-            ev_var = [ev_var var(ev{i})];               
+            ev_mean = [ev_mean mean(ev)];
+            ev_var = [ev_var var(ev)];               
         end
         
         % store evs

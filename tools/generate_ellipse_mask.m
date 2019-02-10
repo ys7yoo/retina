@@ -1,12 +1,13 @@
-function mask =  generate_ellipse_mask(mu, C, h, w)
+function [mask, XX, YY] =  generate_ellipse_mask(mu, C, h, w)
 
 % generate 95% confidence interval ellipse mask
 
 [XX, YY] = meshgrid(1:w, 1:h);
-
+XX = XX(:);
+YY = YY(:);
 %R = chol(C);
 
-tt = [XX(:)-mu(1) YY(:)-mu(2)]*inv(chol(C));
+tt = [XX-mu(1) YY-mu(2)]*inv(chol(C));
 phi = (tt(:,1)).^2 + (tt(:,2)).^2;
 
 phi = reshape(phi, h, w);
@@ -20,6 +21,7 @@ phi = reshape(phi, h, w);
 mask = 2.4477^2 - phi;
 %plot_ellipse(, , 'r-');
 
+mask = mask >=0;
 
 return 
 

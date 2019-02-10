@@ -214,8 +214,9 @@ for n = channel_index_to_analyze
     saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channel_names{n}))
     
     % saves the largest RF from each cell
-    RFs{cnt} = strongest_RF;
-    cnt = cnt + 1;
+    RFs{n} = strongest_RF;
+    %RFs{cnt} = strongest_RF;
+    %cnt = cnt + 1;
     
 end
 
@@ -224,7 +225,7 @@ end
 %% plot mosaic
 
 clf; hold on
-for n=1:length(RFs)
+for n=channel_index_to_analyze
     switch RFs{n}.type
         case 'ON'
             plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'r-');
@@ -232,7 +233,7 @@ for n=1:length(RFs)
             tt.Color = [1 0 0];
         case 'OFF'
             plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'b-');
-            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center')
+            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center');
             tt.Color = [0 0 1];
     end
 end
@@ -252,17 +253,183 @@ saveas(gcf, sprintf('mosaic.pdf'))
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CLEANED UP UPTO THIS POINT (2019. 1.27)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%% calc STA & STC  # ONLY FOR SELECTED CHANNELS and inside of RF!
+clear stc_RF
+for n = channel_index_to_analyze
+    
+    close all
+    
+    %% generate RF mask 
+    [mask, XX, YY] = generate_ellipse_mask(RFs{n}.mean, RFs{n}.cov, width, height);   
+    
+    %% calc STA and STC
+    [sta_RF{n}, stc_RF{n}] = calc_STA_and_STC(stim(:,mask(:)), spike_train(:,n), sta_num_samples);
+    
+
+    tic;
+    [u, d, ~] = svd(stc_RF{n});
+    toc
+    ev = diag(d);
+    ev = ev(ev>1e-5);
+    
+
+    %% calc range of STC eigen values
+    disp(['Calculating the significance interval of eigen values for ' channel_names{n}])
+    tic;
+    ev_range = calc_STC_eigenvalue_range(stim(:,mask(:)), spike_train(:,n), sta_num_samples, 50, sta_num_samples*[10 50])
+    toc;
+    
+    idx_large_eig = find (ev > ev_range(2));
+    idx_small_eig = find (ev < ev_range(1));
+    
+    
+    %% to plot
+    sta_RF_var = var(sta_RF{n},[],1);
+    [~, sorted_index] = sort(sta_RF_var, 'descend');
+    
+    %
+    clf
+    subplot(231)
+    plot(sta_RF{n})
+    ylabel('STA')
+    box off
+
+    subplot(232)
+    bar(sta_RF_var)
+    xlabel('pixel index')
+    ylabel('var(STA)')
+    box off
+
+    subplot(234)
+    plot(ev)
+    hold on
+    XLIM=get(gca,'xlim');
+    plot(XLIM, ev_range(1)*[1 1], 'r--')
+    plot(XLIM, ev_range(2)*[1 1], 'r--')
+    
+    plot(idx_large_eig, ev(idx_large_eig), '*r')
+    plot(idx_small_eig, ev(idx_small_eig), '*b')
+    ylabel('eigen values')
+    box off
+    %axis tight
+
+    
+    if ~isempty(idx_large_eig)
+        subplot(235)
+        %idx_to_plot = 1;
+        us = reshape(u(:,idx_large_eig),sta_num_samples,[]);
+        plot(us)
+        us_var = var(us, [], 1);
+        
+        %RF_area_in_pixel = size(us,2);
+       % us_var = var(us, [], 1);
+        %h = plot(us(:,sorted_index) - repmat(0.3*(1:RF_area_in_pixel),sta_num_samples,1), 'r');
+        %h(max_idx).LineStyle = '--';
+        %plot(reshape(U(:,1),sta_num_samples,[]))
+        %axis off
+        
+        title ('STC filter with the large eig. val.')
+        box off
+        
+        for ii = idx_large_eig
+            figure
+            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0))
+            
+            set(gcf, 'paperposition', [0 0 24 9])
+            set(gcf, 'papersize', [24 9])
+
+            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.png',channel_names{n},ii))
+            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.pdf',channel_names{n},ii))
+        end
+        
+        figure(1)
+        
+    end
+
+    if ~isempty(idx_small_eig)
+        subplot(236)
+        %idx_to_plot = length(ev);
+        us = reshape(u(:,idx_small_eig),sta_num_samples,[]);
+        plot(us)
+        us_var = var(us, [], 1);
+        
+        %RF_area_in_pixel = size(us,2);
+        %h = plot(us(:,sorted_index) - repmat(0.3*(1:RF_area_in_pixel),sta_num_samples,1), 'b');
+        %plot(reshape(us,sta_num_samples,[]))      
+        %axis off
+        title ('STC filter with the small eig. val.')
+        box off
+        
+        
+        for ii = idx_small_eig
+            figure
+            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height)
+            
+            set(gcf, 'paperposition', [0 0 24 9])
+            set(gcf, 'papersize', [24 9])
+
+            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.png',channel_names{n},ii))
+            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.pdf',channel_names{n},ii))
+        end
+        
+        figure(1)
+    end
+    
+%     subplot(236)
+% %     plot3(repmat((1:sta_num_samples)',1,25), repmat(xx',sta_num_samples,1), repmat(yy',sta_num_samples,1) + reshape(U(:,1),sta_num_samples,[])) 
+%     bar(us_var)
+% %     xlabel('t')
+% %     ylabel('x')
+% %     zlabel('y')
+
+    set(gcf, 'paperposition', [0 0 24 15])
+    set(gcf, 'papersize', [24 15])
+
+    saveas(gcf, sprintf('STC_inside_RF_%s.png',channel_names{n}))
+    saveas(gcf, sprintf('STC_inside_RF_%s.pdf',channel_names{n}))
+    
+%     %% plot filters separately 
+%     figure(2)
+%     plot_stim_slices(u(:,1), sta_num_samples)
+%     
+%     figure(3)
+%     plot_stim_slices(u(:,length(ev)), sta_num_samples)
+    
+end
+
+
+
+
+
+
+
+%% compare variances
+figure()
+plot(sta_RF_var, us_var, 'o')
+xlabel('var(STA)')
+ylabel('var(STC)')
+box off
+
+
 
 return 
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CLEANED UP UPTO THIS POINT (2019. 2. 11)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% 2. calc STA & STC
-for n=1:length(channel_names)
+
+
+
+
+
+%% 2. calc STA & STC  # ONLY FOR SELECTED CHANNELS!
+for n = channel_index_to_analyze
     
     
     
@@ -271,9 +438,11 @@ for n=1:length(channel_names)
     [sta_all_channels{n}, stc{n}] = calc_STA_and_STC(stim, spike_train(:,n), sta_num_samples);
     
     
-    %% calc range of STC eigen values
-    ev_range = calc_STC_eigenvalue_range(stim, spike_train(:,n), sta_num_samples, 50, sta_num_samples*[10 50]);
-
+    %% calc range of STC eigen values (THIS IS TOO SLOW)
+    disp(['Calculating the significance interval of eigen values for ' channel_names{n}])
+    tic;
+    ev_range = calc_STC_eigenvalue_range(stim, spike_train(:,n), sta_num_samples, 50, sta_num_samples*[10 50])
+    toc;
     
     
     
@@ -336,19 +505,25 @@ for n=1:length(channel_names)
     
     
     %% analyze STC result
-    STC = stc{n}{idx_max_STA,idx_max_STA};   % choose STC of the target pixel
+    %STC = stc{n}{idx_max_STA,idx_max_STA};   % choose STC of the target pixel
+    %[U, D, V] = svd(STC);
+    disp('anlayzin STC...')
+    tic;
+    [U, D, ~] = svd(stc{n});             % takes about 40 sec
+    toc
     
-    [U, D, V ] = svd(STC);
     ev = diag(D);
-
+    ev = ev(ev>1e-5);
+    
     % match the sign of U to be consistent with sta_max_var
-    sgn = sign(U*sta_max_var);
-    UU=U*diag(sgn);
-    VV=diag(sgn)*V;
+%     sgn = sign(U*sta_max_var);
+%     UU=U*diag(sgn);
+%     VV=diag(sgn)*V;
     
-    
+    %% plot
     subplot(r,c,5)
-    imagesc(STC)
+    %imagesc(STC)
+    plot_off_diag(stc{n})
     %colormap gray
     box off
     title('STC for the pixel with the largest variance')
@@ -359,10 +534,12 @@ for n=1:length(channel_names)
     %plot(length(ev), ev(end), 'r*')   
     
     % plot range 
-    hold on
-    XLIM=get(gca,'xlim');
-    plot(XLIM, ev_range(1)*[1 1], 'r--')
-    plot(XLIM, ev_range(2)*[1 1], 'r--')
+    if exist('ev_range','var')
+        hold on
+        XLIM=get(gca,'xlim');
+        plot(XLIM, ev_range(1)*[1 1], 'r--')
+        plot(XLIM, ev_range(2)*[1 1], 'r--')
+    end
     
     
     box off
@@ -370,7 +547,8 @@ for n=1:length(channel_names)
     
     subplot(r,c,7)
     %plot(eig(stc{max_idx(n),max_idx(n)}), 'o')
-    plot(UU(:,[1,end]))
+    %plot(UU(:,[1,end]))
+    plot(U(:,[1,end]))
     box off
     title ('eigen vectors')
     
@@ -387,8 +565,8 @@ for n=1:length(channel_names)
 %     set(gcf, 'paperposition', [0 0 11 5])
 %     set(gcf, 'papersize', [11 5])
 
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.pdf',CELL_TYPE, fps, channel_names{n}))
-    saveas(gcf, sprintf('%s_%dHz_%s_STA_and_STC.png',CELL_TYPE, fps, channel_names{n}))
+    saveas(gcf, sprintf('%s_STA_and_STC.pdf', channel_names{n}))
+    saveas(gcf, sprintf('%s_STA_and_STC.png', channel_names{n}))
     
     %% analysis of STC for all pixels (2018.10.24)
     num_pixels = size(stc{n},1);
