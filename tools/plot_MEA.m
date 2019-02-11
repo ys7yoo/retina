@@ -3,10 +3,10 @@ function plot_MEA(offset_x, offset_y, LINE_TYPE)
 
 %% default params
 if nargin<1
-    offset_x = 7;
+    offset_x = 4;
 end
 if nargin<2
-    offset_y = 4;
+    offset_y = 7;
 end 
 if nargin<3
     LINE_TYPE='k';       %  default color is black
@@ -26,7 +26,7 @@ hold on
 % 
 channel_no = 11:10:81;
 
-text(grid_x-0.4, max(Y)+1, sprintfc('%d',channel_no))
+text(grid_x, max(Y)+1.5, sprintfc('%d',channel_no), 'HorizontalAlignment','center')
 
 
 axis xy

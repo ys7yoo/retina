@@ -224,24 +224,20 @@ end
 
 %% plot mosaic
 
+FLIP_XY=true;
+
 clf; hold on
 for n=channel_index_to_analyze
-    switch RFs{n}.type
-        case 'ON'
-            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'r-');
-            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center');
-            tt.Color = [1 0 0];
-        case 'OFF'
-            plot_ellipse(RFs{n}.mean, RFs{n}.cov, 'b-');
-            tt=text(RFs{n}.mean(1), RFs{n}.mean(2), RFs{n}.channel_name(4:end), 'HorizontalAlignment','center');
-            tt.Color = [0 0 1];
-    end
+    plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
 end
 xlabel('x')
 ylabel('y')
 title('Receptive field mosaic')
-axis image
-axis ([1 width 1 height])
+axis xy
+axis ([1 width+2  4 height+4])
+
+plot_MEA
+
 
 set(gcf, 'paperposition', [0 0 24 20])
 set(gcf, 'papersize', [24 20])
@@ -334,9 +330,10 @@ for n = channel_index_to_analyze
         title ('STC filter with the large eig. val.')
         box off
         
-        for ii = idx_large_eig
+        for i = 1:length(idx_large_eig)
+            ii = idx_large_eig(i);
             figure
-            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0))
+            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height)
             
             set(gcf, 'paperposition', [0 0 24 9])
             set(gcf, 'papersize', [24 9])
@@ -345,7 +342,7 @@ for n = channel_index_to_analyze
             saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.pdf',channel_names{n},ii))
         end
         
-        figure(1)
+        figure(1) % go back to figure 1
         
     end
 
@@ -375,7 +372,7 @@ for n = channel_index_to_analyze
             saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.pdf',channel_names{n},ii))
         end
         
-        figure(1)
+        figure(1) % go back to figure 1
     end
     
 %     subplot(236)

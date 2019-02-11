@@ -1,8 +1,12 @@
-function plot_ellipse(avg, covariance, LINE_TYPE)
+function plot_ellipse(avg, covariance, LINE_TYPE, FLIP_XY)
 
 if nargin<3
     LINE_TYPE = 'r--';
 end
+if nargin<4
+    FLIP_XY = false;
+end
+    
 
 %% simpler version based on linear algebra
 
@@ -14,8 +18,12 @@ circ = [cos(theta') sin(theta')];
 ellipse = avg + circ*chol(covariance)*diag([2.4477, 2.4477]);
 
 
-%plot(circ(:,1), circ(:,2), 'k--'); hold on
-plot(ellipse(:,1), ellipse(:,2), LINE_TYPE); 
+if ~FLIP_XY
+    %plot(circ(:,1), circ(:,2), 'k--'); hold on
+    plot(ellipse(:,1), ellipse(:,2), LINE_TYPE); 
+else
+    plot(ellipse(:,2), ellipse(:,1), LINE_TYPE); 
+end
 
 
 return
