@@ -1,6 +1,10 @@
-function plot_stim_slices_with_mask(stim, sta_num_samples, XX, YY, w, h)
+function plot_stim_slices_with_mask(stim, sta_num_samples, XX, YY, w, h, FLIP_XY)
 
-num_pixels = length(XX)
+if nargin< 7 
+    FLIP_XY = false;
+end
+
+num_pixels = length(XX);
 
 %%
 stim_max = max(stim(:));
@@ -28,7 +32,12 @@ for i=1:sta_num_samples
     imagesc(slice, [stim_min stim_max])
     %surf(reshape(st(i,:,:),h,w))
     colormap gray
-    axis ij
+    axis xy
+    
+    if FLIP_XY
+        view([90 -90])
+    end
+    
 end
 
 return 
