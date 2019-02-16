@@ -1,10 +1,14 @@
-function [sta, stc] = calc_STA_and_STC(Stim, spike_train, n)
+function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(Stim, spike_train, n, sta_to_project_out)
 
 % input:
 %       Stim = (time) x (space)
 %       spike_train = (time) x (spikes)
 %       n = number of samples for analysis
+%       sta_to_project_out
 
+if nargin<4
+    sta_to_project_out = [];
+end
 
 dim = size(Stim,2);     % dimension of the stimulus
 spike_train(1:n-1,:) = 0;  % Ignore spikes before time n
@@ -13,32 +17,92 @@ spike_train(1:n-1,:) = 0;  % Ignore spikes before time n
 spike_idx = find(spike_train>0);
 
 spikes = spike_train(spike_idx);
+% num_bins = length(spikes);
 num_total_spikes = sum(spikes);
 
 
-% construct desing matrix
-SS = makeStimRows(Stim, n, spike_idx);
+% construct design matrix
+X = makeStimRows(Stim, n, spike_idx);
 
 
 %% calc STA
-sta = (spikes'*SS)'/num_total_spikes;
+% new implementation (when spikes are either 1 or 0, Matlab mean function is slightly faster!
+%sta = mean(X);
 
+sta = spikes'*X/num_total_spikes;
 
-%% calc STC
-if nargout > 1
+%% calc STC (FINAL ALGORITHM)
 
-    %% calc STC
-    % implementation 1 (when spikes are either 1 or 0, Matlab cov function is faster!
-    stc = cov(SS);
+if nargout>1
     
-    % implementation 2
-    % stc = SS'*bsxfun(@times, SS, spikes)/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
     
-    % implementation 3
-    %rowlen = size(SS,2);
-    %stc = SS'*(SS.*repmat(spikes,1,rowlen))/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
     
+    % subtract mean first
+    X = bsxfun(@minus, X, sta);
+    
+    % project out sta, if requested
+    if ~isempty(sta_to_project_out)
+        X = project_out_sta(X, sta_to_project_out);
+    end
+    
+    
+    S = X'*bsxfun(@times, X, spikes);  % DO NOT DIVIDE by num_total_spikes FOR BETTER NUMERICAL PRECISION. So, actually S is a scatter matrix.
+
+    [stc_eig_vec, d, ~] = svd(S);
+
+    stc_eig_val = diag(d);
+
 end
+        
+% % 
+% % switch nargout
+% %     case 1  % STA only
+% %         
+% %     case 2  % STA and STC eigen value only (COVARIANCE NOT NEEDED)
+% % 
+% %         % subtract mean & scale down 
+% %         %SS = bsxfun(@minus, SS, sta) / (num_bins-1);
+% %         X = bsxfun(@minus, X, sta);       % DO NOT DIVIDE FOR BETTER NUMERICAL PRECISION
+% % 
+% %         [~, D, ~] = svd(X);
+% %         stc_eig_val = diag(D).^2;
+% % 
+% %     case 3  % STA and STC eigen value & eiven vectors (COVARIANCE NOT NEEDED)
+% % 
+% %         % subtract mean & scale down 
+% %         X = bsxfun(@minus, X, sta);       % DO NOT DIVIDE FOR BETTER NUMERICAL PRECISION
+% % 
+% %         [~, D, stc_eig_vec] = svd(X);
+% %         stc_eig_val = diag(D).^2;
+% % 
+% %         
+% %         
+% %     case 4  % STA and full STC
+% %         %% calc STC
+% %         
+% %         % subtract mean
+% % %         X = bsxfun(@minus, X, sta);       % DO NOT DIVIDE FOR BETTER NUMERICAL PRECISION
+% % %         
+% % %         covariance = X'*X;
+% %          
+% %         % implementation 1 (when spikes are either 1 or 0, Matlab cov function is faster!
+% %         %covariance = cov(X);
+% % 
+% %         % implementation 2
+% %         covariance = X'*bsxfun(@times, X, spikes) - sta*sta'*num_total_spikes;  % DO NOT DIVIDE FOR BETTER NUMERICAL PRECISION
+% %         %covariance = X'*bsxfun(@times, X, spikes)/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
+% % 
+% %         % implementation 3
+% %         %rowlen = size(SS,2);
+% %         %stc = X'*(X.*repmat(spikes,1,rowlen))/(num_total_spikes-1) - sta*sta'*num_total_spikes/(num_total_spikes-1);
+% %         
+% %         
+% %         [stc_eig_vec, d, ~] = svd(covariance);
+% %     
+% %         stc_eig_val = diag(d);
+% %         %stc_eig_val = stc_eig_val(stc_eig_val>1e-5);
+% %     
+% % end
 
 
 if dim ~= 1
