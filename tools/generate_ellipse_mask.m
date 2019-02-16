@@ -7,7 +7,8 @@ XX = XX(:);
 YY = YY(:);
 %R = chol(C);
 
-tt = [XX-mu(1) YY-mu(2)]*inv(chol(C));
+tt = [XX-mu(1) YY-mu(2)]/chol(C);
+%tt = [XX-mu(1) YY-mu(2)]*inv(chol(C));
 phi = (tt(:,1)).^2 + (tt(:,2)).^2;
 
 phi = reshape(phi, h, w);
