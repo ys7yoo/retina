@@ -92,6 +92,20 @@ hold on;
 
 return 
 
+%% test for enlargement
+
+close all
+C = [1 0; 0 1];
+eig(C)
+plot_ellipse([0 0], C)
+
+hold on 
+plot_ellipse([0 0], C*2^2)
+
+%%
+[U, D, V] = svd(C)
+
+
 
 
 %%  test
