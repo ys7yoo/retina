@@ -45,12 +45,30 @@ if nargout>1
         X = project_out_sta(X, sta_to_project_out);
     end
     
-    
-    S = X'*bsxfun(@times, X, spikes);  % DO NOT DIVIDE by num_total_spikes FOR BETTER NUMERICAL PRECISION. So, actually S is a scatter matrix.
+    switch nargout 
+        
+        case 2   % STA and STC eigen value only (COVARIANCE NOT NEEDED)
+            Xs = bsxfun(@times, X, sqrt(spikes));
+            
+            [~, D, ~] = svd(Xs);
+            stc_eig_val = diag(D).^2;
 
-    [stc_eig_vec, d, ~] = svd(S);
+        case 3  % STA and STC eigen value & eiven vectors (COVARIANCE NOT NEEDED)
 
-    stc_eig_val = diag(d);
+            % subtract mean & scale down 
+            Xs = bsxfun(@times, X, sqrt(spikes));
+
+            [~, D, stc_eig_vec] = svd(Xs);
+            stc_eig_val = diag(D).^2;
+            
+            
+        case 4 % full algorithm with covariance
+            S = X'*bsxfun(@times, X, spikes);  % DO NOT DIVIDE by num_total_spikes FOR BETTER NUMERICAL PRECISION. So, actually S is a scatter matrix.
+
+            [stc_eig_vec, d, ~] = svd(S);
+
+            stc_eig_val = diag(d);            
+    end
 
 end
         
