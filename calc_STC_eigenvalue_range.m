@@ -21,17 +21,18 @@ function  [ev_upper, ev_lower, evs, num_spikes] = calc_STC_eigenvalue_range(stim
         %disp('.')
         %% random shift
         random_shift = round(diff(random_shift_range) * rand(1)  + random_shift_range(1));
-    
         
         %% calc STA and STC
-        [~, ev] = calc_STA_and_STC(stim(random_shift:end,:), spikeTrain(1:end-random_shift+1,:), num_samples_per_window, sta_to_project_out);
+        shift_min = random_shift_range(1);
+        shift_max = random_shift_range(2);       
+        [~, ev] = calc_STA_and_STC(stim(random_shift+1:end-(shift_max-random_shift),:), spikeTrain(1:end-shift_max,:), num_samples_per_window, sta_to_project_out);
                 
         % store evs
         evs(1:length(ev),n) = ev;    
 
         % store evs
         if nargout>3
-            num_spikes(:,n) = sum(spikeTrain(1:end-random_shift+1,:));
+            num_spikes(:,n) = sum(spikeTrain(1:end-shift_max,:));
         end
                         
     end
