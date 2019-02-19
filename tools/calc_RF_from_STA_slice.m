@@ -1,4 +1,4 @@
-function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, X, Y, fps)
+function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, X, Y, fps, FLIP_XY)
 
 [T, num_pixels] = size(STA);
 gridT = (-T+1:0)/fps;
@@ -48,12 +48,17 @@ pos_RF = [];
 neg_RF = [];
 cnt_pos_RF = 0; pos_RFs = []; %clear pos_RFs
 cnt_neg_RF = 0; neg_RFs = []; %clear neg_RFs
+strongest_RF = [];
 for t=1:T
     slice  = STA(t,:);
     subplot(r,c,cnt)
-    imagesc(reshape(slice, X,Y), [min_val max_val])
+    if ~FLIP_XY
+        imagesc(reshape(slice, X,Y), [min_val max_val])
+    else
+        imagesc(reshape(slice, X,Y)', [min_val max_val])
+    end
     %axis tight equal
-    
+    axis xy
     %colorbar
     
     %% Step 2. calc weighted centers 
@@ -68,7 +73,7 @@ for t=1:T
         
         if sum(eig_values>0) == 2
             %plot(pos_center(1), pos_center(2), '+r', 'markersize', 5)
-            plot_ellipse(pos_center, pos_cov, 'r-');
+            plot_ellipse(pos_center, pos_cov, 'r-', FLIP_XY);
         
             
             cnt_pos_RF = cnt_pos_RF + 1;
@@ -91,7 +96,7 @@ for t=1:T
      
         if sum(eig_values>0) == 2
             %plot(neg_center(1), neg_center(2), '+b', 'markersize', 5)
-            plot_ellipse(neg_center, neg_cov, 'b-');
+            plot_ellipse(neg_center, neg_cov, 'b-', FLIP_XY);
         
             cnt_neg_RF = cnt_neg_RF + 1;
 

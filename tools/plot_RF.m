@@ -4,6 +4,10 @@ if nargin<2
     FLIP_XY = false;
 end
 
+if ~isfield(RF, 'type')
+    return
+end
+
 switch RF.type
     case 'ON'
         LINE_STYLE = 'r-';
