@@ -290,7 +290,7 @@ for n = channel_index_to_analyze
     
     if USE_MASK
         % cleaned up
-        [sta_RF{n}, ev, u] = calc_STA_and_STC(stim(1:end-shift_max,mask(:))-0.5, spike_train(1:end-shift_max,n), sta_num_samples);
+        [sta_RF{n}, ev, u] = calc_STA_and_STC(stim(1:end-shift_max,mask(:))-0.5, spike_train(1:end-shift_max,n), sta_num_samples, true);
     else
         
         %[sta_RF{n}, ev, u] = calc_STA_and_STC(stim, spike_train(:,n), sta_num_samples);
@@ -315,9 +315,9 @@ for n = channel_index_to_analyze
     tic;
     num_repeat=10;
     if USE_MASK
-        idx_significant_ev = find_significant_eigen_values(ev, u, stim(:,mask(:))-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min shift_max], sta_RF{n});
+        idx_significant_ev = find_significant_eigen_values(ev, u, stim(:,mask(:))-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min shift_max]);
     else
-        idx_significant_ev = find_significant_eigen_values(ev, u, stim-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min, shift_max], sta_RF{n});
+        idx_significant_ev = find_significant_eigen_values(ev, u, stim-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min, shift_max]);
     end
     toc
     

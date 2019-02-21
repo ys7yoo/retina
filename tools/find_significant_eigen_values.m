@@ -13,7 +13,11 @@ ev = ev(ev>1e-5);
 num_eigen_values = length(ev);
 u = u(:,1:num_eigen_values);
 
-if nargin <9
+if nargin < 8
+    sta_to_project_out = [];
+end
+    
+if nargin < 9
     idx_candidate = [1 num_eigen_values];
 end
 idx_candidate
@@ -86,11 +90,14 @@ ev_lower = mm - 2.576*ss;
 % ev_upper = mm + 1.96*ss;
 % ev_lower = mm - 1.96*ss;
 
-plot(ev,'ko--')
+plot(ev,'ko-', 'linewidth', 2)
 hold on
 plot(ev_upper, 'r--')
 plot(ev_lower, 'r--')
+plot(evs, 'color', 0.5*[1 1 1])
 set(gca,'yscale','log')
+
+set(gca,'xlim', length(ev)+[-4 0])
 
 %     XLIM=get(gca,'xlim');
 %     plot(XLIM, ev_range(1)*[1 1], 'r--')

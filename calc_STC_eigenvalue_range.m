@@ -17,22 +17,32 @@ function  [mm, ss, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain
     dim = size(stim,2) * num_samples_per_window;
     evs = zeros(dim, num_random_shift);
             
+    shift_min = random_shift_range(1);
+    shift_max = random_shift_range(2); 
+        
     for n=1:num_random_shift
         %disp('.')
         %% random shift
         random_shift = round(diff(random_shift_range) * rand(1)  + random_shift_range(1));
         
-        %% calc STA and STC
-        shift_min = random_shift_range(1);
-        shift_max = random_shift_range(2);       
-        [~, ev] = calc_STA_and_STC(stim(random_shift+1:end-(shift_max-random_shift),:), spikeTrain(1:end-shift_max,:), num_samples_per_window, sta_to_project_out);
+        %% calc ev of STC
+        [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim(random_shift+1:end-(shift_max-random_shift),:), spikeTrain(1:end-shift_max,:), num_samples_per_window);
+        
+        if ~isempty(sta_to_project_out)
+            X = project_out_components(X, sta_to_project_out);
+        end
+        
+        ev = calc_STC(X, spikes);
+    
+        
+        %[~, ev] = calc_STA_and_STC(stim(random_shift+1:end-(shift_max-random_shift),:), spikeTrain(1:end-shift_max,:), num_samples_per_window, sta_to_project_out);
                 
         % store evs
         evs(1:length(ev),n) = ev;    
 
         % store evs
         if nargout>3
-            num_spikes(:,n) = sum(spikeTrain(1:end-shift_max,:));
+            num_spikes(:,n) = num_total_spikes;
         end
                         
     end
@@ -100,7 +110,37 @@ hold on
 YLIM = get(gca,'ylim');
 plot(evs_mean*[1 1], YLIM, 'r--');
 
+%% new plot
+close all
 
+CONFIDENCE=2.576; %% 99% 
+%CONFIDENCE=1.96;  % 95% 
+
+subplot(121)
+% plot(ev, 'linewidth', 2); hold on;
+plot(evs, 'color', 0.5*[1 1 1]); hold on 
+plot(mm+CONFIDENCE*ss, 'r--')
+plot(mm-CONFIDENCE*ss, 'r--')
+set(gca,'yscale', 'log')
+
+subplot(122)
+% plot(ev, 'linewidth', 2); hold on;
+plot(evs, 'color', 0.5*[1 1 1]); hold on 
+plot(mm+CONFIDENCE*ss, 'r--')
+plot(mm-CONFIDENCE*ss, 'r--')
+set(gca,'yscale', 'log')
+
+set(gca,'xlim', length(ev)+ [-5 0])
+
+% subplot(223)
+% hist(evs(1,:))
+% 
+% subplot(224)
+% hist(evs(end,:))
+
+
+
+        
 %%
 subplot(221)
 %hist(mean(evs,2))
