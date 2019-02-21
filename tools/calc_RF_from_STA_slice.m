@@ -1,20 +1,23 @@
-function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, T, X, Y, fps, FLIP_XY)
+function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, T, width, height, fps, FLIP_XY)
+
+
+
+[XX, YY] = meshgrid(1:width,1:height);
+% XX=XX(:);
+% YY=YY(:);
+% 
+% height = max(YY);
+% width  = max(XX);
+
+%% Step 1. calc noise sigma
+sig = std(STA(:));
+
+%% reshape to get slice
 
 STA = reshape(STA, T, []);
 
 %[T, num_pixels] = size(STA);
 gridT = (-T+1:0)/fps;
-
-[YY, XX] = meshgrid(1:X,1:Y);
-XX=XX(:);
-YY=YY(:);
-
-height = max(YY);
-width  = max(XX);
-
-%% Step 1. calc noise sigma
-sig = std(STA(:));
-
 
 %% find positive / negative peak slides
 [max_val, max_slice_idx] =  max(max(STA, [], 2));
@@ -55,9 +58,9 @@ for t=1:T
     slice  = STA(t,:);
     subplot(r,c,cnt)
     if ~FLIP_XY
-        imagesc(reshape(slice, X,Y), [min_val max_val])
+        imagesc(reshape(slice, height, width), [min_val max_val])
     else
-        imagesc(reshape(slice, X,Y)', [min_val max_val])
+        imagesc(reshape(slice, height, width)', [min_val max_val])
     end
     %axis tight equal
     axis xy
@@ -66,7 +69,7 @@ for t=1:T
     %% Step 2. calc weighted centers 
     % noise)
     slice_smoothed = smooth_STA_slice(slice, 1.0);
-    [pos_center, pos_cov, num_pos_pixels, neg_center, neg_cov, num_neg_pixels] =  calc_weighted_centers(slice_smoothed, X, Y, 2.58*sig);
+    [pos_center, pos_cov, num_pos_pixels, neg_center, neg_cov, num_neg_pixels] =  calc_weighted_centers(slice_smoothed, width, height, 2.58*sig);
     hold on
     
     %% Step 3. plot ellipses (95% significant)
