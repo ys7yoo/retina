@@ -1,4 +1,4 @@
-function  [ev_upper, ev_lower, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain, num_samples_per_window, num_random_shift, random_shift_range, sta_to_project_out)
+function  [mm, ss, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain, num_samples_per_window, num_random_shift, random_shift_range, sta_to_project_out)
 
     %% set default params for shuffle
     if nargin<4
@@ -45,9 +45,14 @@ function  [ev_upper, ev_lower, evs, num_spikes] = calc_STC_eigenvalue_range(stim
     mm = nanmean(evs,2);
     ss = nanstd(evs,[],2);
     
-    % 99% confidence interval for each eig
-    ev_upper = mm+2.576*ss;
-    ev_lower = mm-2.576*ss;
+%     Confidence interval calculation is upto the user!
+%     % 95% confidence interval for each eig
+%     ev_upper = mm+1.96*ss;
+%     ev_lower = mm-1.96*ss;
+%     
+%     % 99% confidence interval for each eig
+%     ev_upper = mm+2.576*ss;
+%     ev_lower = mm-2.576*ss;
     
 
 %     % 99% significance interval

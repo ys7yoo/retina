@@ -1,12 +1,13 @@
-function Us = flip_column_sign(U, sta)
+function U = flip_column_sign(U, sta)
 % flip signs of columns to match that of sta
 % U - columns vectors
 % sta - a row vector
 
-sign_of_inner_products = sign(U*sta);
+sign_of_inner_products = (sta*U)>=0;
+% find negatives
+idx_neg = find(sign_of_inner_products<0);
 
-
-Us = bsxfun(@times, U, sign_of_inner_products);
+U(:,idx_neg) = -U(:,idx_neg);
 
 
 end
