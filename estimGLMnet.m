@@ -12,7 +12,7 @@ addpath([basedir '/glmtools_misc/']);
 addpath([basedir '/nlfuns/']);
 addpath([basedir '/glmtools_spline/']);
 
-
+addpath tools
 %% load data! 
 
 clear
@@ -161,7 +161,7 @@ toc
 %% lanch app to analyze individual channels and 
 % decide which channels to analyze further
 
-addpath tools
+
 sta_app
 
 %%
