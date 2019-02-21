@@ -19,8 +19,9 @@ sta = spikes'*X/num_total_spikes;
 %% calc STC (FINAL ALGORITHM)
 if nargout>1
     %% preprocessing  
-    % 1) subtract mean
-    X = bsxfun(@minus, X, sta);
+%     % MEAN SHOULD BE SUBTRACTED BEFORE CALLING!
+%     % 1) subtract mean
+%     X = bsxfun(@minus, X, sta);
         
     % 2) project out sta, if requested
     if ~isempty(sta_to_project_out)
