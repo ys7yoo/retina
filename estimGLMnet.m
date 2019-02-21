@@ -212,7 +212,7 @@ for n = channel_index_to_analyze
     clf
     
     
-    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, height, width, fps, FLIP_XY);
+    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, sta_num_samples, height, width, fps, FLIP_XY);
     strongest_RF.channel_name = channel_names{n};
     set(gcf, 'paperposition', [0 0 24 9])
     set(gcf, 'papersize', [24 9])

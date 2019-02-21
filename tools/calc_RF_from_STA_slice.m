@@ -1,6 +1,8 @@
-function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, X, Y, fps, FLIP_XY)
+function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, T, X, Y, fps, FLIP_XY)
 
-[T, num_pixels] = size(STA);
+STA = reshape(STA, T, []);
+
+%[T, num_pixels] = size(STA);
 gridT = (-T+1:0)/fps;
 
 [YY, XX] = meshgrid(1:X,1:Y);
