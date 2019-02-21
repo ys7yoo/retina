@@ -327,16 +327,24 @@ for n = channel_index_to_analyze
     if ~isempty(idx_significant_ev)
         idx_significant_ev
     end
-    %%
+    
+    %% plot results for this channel
     %close all
+    
     figure(1)
+    if num_significant_evs(n) == 0 
+        r=2;
+    else
+        r=1+ceil(num_significant_evs(n)/2);
+    end
+    c=2;
     clf
-    subplot(221)
+    subplot(r,c,1)
     plot(reshape(sta_RF{n}, sta_num_samples,[]))
     ylabel('STA')
     box off
 
-    subplot(222)
+    subplot(r,c,2)
     plot(ev)
     hold on
 %     plot(ev_upper, 'r--')
@@ -363,15 +371,14 @@ for n = channel_index_to_analyze
         for i = 1:length(idx_significant_ev)
             ii = idx_significant_ev(i);
                     
-            if i<=2  % plot first 4 filters in subplots
-                figure(1)
-                subplot(2,2,2+i)
-                us = reshape(u(:,ii),sta_num_samples,[]);
-                plot(us)
+            figure(1)
+            subplot(r,c,2+i)
+            us = reshape(u(:,ii),sta_num_samples,[]);
+            plot(us)
 
-                title (sprintf('STC filter %d',ii))
-                box off
-            end
+            title (sprintf('STC filter %d',ii))
+            box off
+
             
             
             figure(2)   % plot spatial pattern in a separate figure
@@ -390,7 +397,7 @@ for n = channel_index_to_analyze
          
          % plot the largest eig vec in gray
         figure(1)
-        subplot(223)
+        subplot(r,c,3)
         us = reshape(u(:,1),sta_num_samples,[]);
         plot(us, 'color', 0.6*[1 1 1])
         
@@ -399,7 +406,7 @@ for n = channel_index_to_analyze
 
         
          % plot the smallest eig vec in gray
-        subplot(224)
+        subplot(r,c,4)
         us = reshape(u(:,length(ev)),sta_num_samples,[]);
         plot(us, 'color', 0.6*[1 1 1])
 
@@ -417,8 +424,8 @@ for n = channel_index_to_analyze
         %%
         figure(1)
         
-        set(gcf, 'paperposition', [0 0 24 20])
-        set(gcf, 'papersize', [24 20])
+        set(gcf, 'paperposition', [0 0 24 10*r])
+        set(gcf, 'papersize', [24 30])
 
         saveas(gcf, sprintf('STC_inside_RF_%s.png',channel_names{n}))
         saveas(gcf, sprintf('STC_inside_RF_%s.pdf',channel_names{n}))
