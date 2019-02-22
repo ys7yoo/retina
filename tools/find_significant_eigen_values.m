@@ -1,6 +1,8 @@
 function [idx_found] = find_significant_eigen_values(ev, u, stim, spike_train, num_samples_per_window, num_random_shift, random_shift_range, sta_to_project_out, idx_candidate)
 
+% CONFIDENCE=3.090; % 99.9%  one-side
 CONFIDENCE=2.326;  % 99%  one-side
+
 %CONFIDENCE=2.576; %% 99%  two-sided
 %CONFIDENCE=1.96;  % 95% 
 %http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_HypothesisTest-Means-Proportions/BS704_HypothesisTest-Means-Proportions3.html
