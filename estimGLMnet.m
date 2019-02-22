@@ -278,47 +278,32 @@ for n = channel_index_to_analyze
     
     
     %% generate RF mask 
+    %     USE_MASK=0;
+    USE_MASK=1;
+    
     %[mask, XX, YY] = generate_ellipse_mask(RFs{n}.mean, RFs{n}.cov, width, height);   
     [mask, XX, YY] = generate_ellipse_mask(RFs{n}.mean, RFs{n}.cov*2^2, width, height);   % consider larger area
     
     
+    % apply mask to select stim to be analyzed
+    stim_chosen=stim(:,mask(:))-0.5;
+    spike_train_chosen = spike_train(:,n);
     
+    %% STC analysis
+    % cleaned up code 
+    [sta_RF{n}, ev, u] = calc_STA_and_STC(stim_chosen(1:end-shift_max,:), spike_train_chosen(1:end-shift_max), sta_num_samples);
     
-    %% calc STC
-%     USE_MASK=0;
-    USE_MASK=1;
-    
-    if USE_MASK
-        % cleaned up
-        [sta_RF{n}, ev, u] = calc_STA_and_STC(stim(1:end-shift_max,mask(:))-0.5, spike_train(1:end-shift_max,n), sta_num_samples, true);
-    else
-        
-        %[sta_RF{n}, ev, u] = calc_STA_and_STC(stim, spike_train(:,n), sta_num_samples);
-        
-        % project out STA component
-        [sta_RF{n}, X, spikes, num_total_spikes] = calc_STA_from_stim(stim(1:end-shift_max,:)-0.5, spike_train(1:end-shift_max,n), sta_num_samples);
-        [~, ev, u] = calc_STA_and_STC(stim(1:end-shift_max,:), spike_train(1:end-shift_max,n)-0.5, sta_num_samples, sta_RF{n}(:)'-0.5);
-    end
-    
-    
-%     [u, d, ~] = svd(stc_RF{n});
-%     
-%     ev = diag(d);
     ev = ev(ev>1e-5);
     num_non_zero_eig_val = length(ev);
     
     u = u(:,1:num_non_zero_eig_val);
     
 
-    %% identify significant eigen values using the nested hypothesis
+    %% identify significant eigen values using bootstraping with nested hypothesis
     disp(['Searching for significant eigenvalues of ' channel_names{n}])
     tic;
-    num_repeat=10;
-    if USE_MASK
-        idx_significant_ev = find_significant_eigen_values(ev, u, stim(:,mask(:))-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min shift_max]);
-    else
-        idx_significant_ev = find_significant_eigen_values(ev, u, stim-0.5, spike_train(:,n), sta_num_samples, num_repeat, [shift_min, shift_max]);
-    end
+    num_repeat=50;
+    idx_significant_ev = find_significant_eigen_values(ev, u, stim_chosen, spike_train_chosen, sta_num_samples, num_repeat, [shift_min shift_max], sta_RF{n});   
     toc
     
         

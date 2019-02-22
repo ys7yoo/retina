@@ -1,4 +1,4 @@
-function  [mm, ss, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain, num_samples_per_window, num_random_shift, random_shift_range, sta_to_project_out)
+function  [evs, num_spikes] = bootstrap_STC_eigen_value(stim, spikeTrain, num_samples_per_window, num_random_shift, random_shift_range, sta_to_project_out)
 
     %% set default params for shuffle
     if nargin<4
@@ -15,19 +15,14 @@ function  [mm, ss, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain
     
     % to store eigen values for each repeat
     dim = size(stim,2) * num_samples_per_window;
-    evs = zeros(dim, num_random_shift);
-            
-    shift_min = random_shift_range(1);
-    shift_max = random_shift_range(2); 
-        
+    evs = zeros(dim, num_random_shift);           
+       
     for n=1:num_random_shift
-        %disp('.')
-        %% random shift
-        random_shift = round(diff(random_shift_range) * rand(1)  + random_shift_range(1));
+        %% random shift & collect spike-triggered stim       
+        [X, spikes, num_total_spikes] = shuffle_stim(stim, spikeTrain, num_samples_per_window, random_shift_range);
         
-        %% calc ev of STC
-        [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim(random_shift+1:end-(shift_max-random_shift),:), spikeTrain(1:end-shift_max,:), num_samples_per_window);
-        
+
+        %% project if requested 
         if ~isempty(sta_to_project_out)
             X = project_out_components(X, sta_to_project_out);
         end
@@ -41,20 +36,20 @@ function  [mm, ss, evs, num_spikes] = calc_STC_eigenvalue_range(stim, spikeTrain
         evs(1:length(ev),n) = ev;    
 
         % store evs
-        if nargout>3
+        if nargout>1
             num_spikes(:,n) = num_total_spikes;
         end
                         
     end
 
 
-    % calc confidence interval using non-zero eigen values
-    evs(evs<1e-6) = nan;
-
-
-    mm = nanmean(evs,2);
-    ss = nanstd(evs,[],2);
-    
+%     % calc confidence interval using non-zero eigen values
+%     evs(evs<1e-6) = nan;
+% 
+% 
+%     mm = nanmean(evs,2);
+%     ss = nanstd(evs,[],2);
+%     
 %     Confidence interval calculation is upto the user!
 %     % 95% confidence interval for each eig
 %     ev_upper = mm+1.96*ss;
@@ -97,6 +92,88 @@ ev_range = calc_STC_eigenvalue_range(stim, spikeTrain(:,n), STA_num_samples, 50,
 %% Further analysis (with mask)
 [ev_range, evs] = calc_STC_eigenvalue_range(stim(:,mask(:)), spike_train(:,n), sta_num_samples, 50, sta_num_samples*[10 50]);
 
+
+%% test with different pojections 
+
+% save sample_X X spikes
+% load sample_X X spikes
+ev0 = calc_STC(X, spikes);
+
+ev1 = calc_STC(project_out_components(X, mean(X)), spikes); 
+% the last eig goes to zero!
+% the slope becomes slightly steeper
+
+
+
+LINE_STYLES = {'-.','-'};
+MARKERS = {'o', '+'};
+COLORS = {'r', 'b'};
+clf
+
+subplot(221)
+h=plot([ev0 ev1]);
+set(h(1), 'LineStyle', LINE_STYLES{1})
+%set(h(1), 'Marker', MARKERS{1})
+set(h(1), 'Color', COLORS{1})
+set(h(2), 'LineStyle', LINE_STYLES{2})
+%set(h(2), 'Marker', MARKERS{2})
+set(h(2), 'Color', COLORS{2})
+box off
+
+ylabel('eigen value')
+xlabel('index')
+
+subplot(222)
+h=qqplot(ev0, ev1)
+xlabel('percentile of ev_0')
+ylabel('percentile of ev_1')
+
+
+% bin=0:10:(max([ev0 ev1])+1);
+% cnt = histc([ev0 ev1], bin);
+% bar(bin, cnt)
+% %plot(bin, cnt)
+% box off
+
+
+subplot(223)
+h=plot([ev0 ev1]);
+set(h(1), 'LineStyle', LINE_STYLES{1})
+set(h(1), 'Marker', MARKERS{1})
+set(h(1), 'Color', COLORS{1})
+set(h(2), 'LineStyle', LINE_STYLES{2})
+set(h(2), 'Marker', MARKERS{2})
+set(h(2), 'Color', COLORS{2})
+box off
+
+ylabel('eigen value')
+xlabel('index')
+
+set(gca, 'xlim', [0 10])
+
+
+subplot(224)
+h=plot([ev0 ev1]);
+set(h(1), 'LineStyle', LINE_STYLES{1})
+set(h(1), 'Marker', MARKERS{1})
+set(h(1), 'Color', COLORS{1})
+set(h(2), 'LineStyle', LINE_STYLES{2})
+set(h(2), 'Marker', MARKERS{2})
+set(h(2), 'Color', COLORS{2})
+box off
+
+ylabel('eigen value')
+xlabel('index')
+
+set(gca, 'xlim', length(ev0) + [-10 0])
+
+
+set(gcf, 'paperposition', [0 0 24 20])
+set(gcf, 'papersize', [24 20])
+
+saveas(gcf, sprintf('projection_and_eigen_values.png'))
+saveas(gcf, sprintf('projection_and_eigen_values.pdf'))
+            
 
 %%
 mean(evs(:))
