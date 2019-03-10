@@ -1,4 +1,4 @@
-function STA_smoothed = smooth_STA_slice(STA, sig, height,width)
+function STA_smoothed = smooth_STA_slice(STA, sig, width, height)
 
 [T, num_pixels] = size(STA);
 
