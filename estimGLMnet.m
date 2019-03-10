@@ -514,8 +514,8 @@ for n = channel_index_to_analyze
         set(gcf, 'paperposition', [0 0 24 10*r])
         set(gcf, 'papersize', [24 10*r])
 
-        saveas(gcf, sprintf('STC_inside_RF_%s.png',channel_names{n}))
-        saveas(gcf, sprintf('STC_inside_RF_%s.pdf',channel_names{n}))
+        saveas(gcf, sprintf('STC_in_ROI_%s.png',channel_names{n}))
+        saveas(gcf, sprintf('STC_in_ROI_%s.pdf',channel_names{n}))
     end
 
     
