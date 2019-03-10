@@ -229,9 +229,11 @@ end
 
 
 
+%% analyze RF centers
+[ab, cd] = fit_RF_center_onto_MEA(RFs, channel_names);
+
+
 %% plot mosaic
-
-
 
 clf; hold on
 for n=channel_index_to_analyze
@@ -239,11 +241,12 @@ for n=channel_index_to_analyze
 end
 xlabel('x')
 ylabel('y')
-title('Receptive field mosaic')
+title('receptive field mosaic')
 axis xy
-axis ([1 width+2  4 height+4])
+axis ([1 width+2  2 height+4])
 
-plot_MEA
+%plot_MEA(offset_X, offset_Y)
+plot_MEA_param(ab, cd);
 
 
 set(gcf, 'paperposition', [0 0 24 20])
@@ -254,11 +257,66 @@ saveas(gcf, sprintf('mosaic.pdf'))
 
 
 
+%% save RF mosaic info
+
+save mosaic channel_names RFs width height ab cd
 
 
 
 
+%% overlap all RFs with MEA as origins
+clf; hold on
+for n=channel_index_to_analyze
+    %%
+    %plot_RF_overlap(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+    %
+    if ~isfield(RFs{n}, 'type')
+        continue
+    end
 
+    %%
+    switch RFs{n}.type
+        case 'ON'
+            LINE_STYLE = 'r-';
+            TEXT_COLOR = [1 0 0];
+        case 'OFF'
+            LINE_STYLE = 'b-';
+            TEXT_COLOR = [0 0 1];        
+    end
+
+    xy = calc_MEA_location_from_channel_name(channel_names{n}, ab, cd)
+
+    
+    center = RFs{n}.mean-xy;
+
+    %plot(xy(2), xy(1), 'o')
+    %plot_ellipse(RFs{n}.mean, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+    %plot_ellipse(xy, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+    plot_ellipse(center, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+    
+    % put names 
+    text(center(2),center(1), channel_names{n}(4:end), 'HorizontalAlignment','center')
+        
+end
+%plot_MEA_param(ab, cd)
+title ('RF with MEA as origin')
+
+
+% ROI +-6 seems to be OK
+plot([-6 6], [-6 -6], 'k--', 'linewidth',2)
+plot([-6 6], [6 6], 'k--', 'linewidth',2)
+plot([-6 -6], [-6 6], 'k--', 'linewidth',2)
+plot([6 6], [-6 6], 'k--', 'linewidth',2)
+
+
+set(gcf, 'paperposition', [0 0 24 20])
+set(gcf, 'papersize', [24 20])
+
+saveas(gcf, sprintf('RFs_overlap.png'))
+saveas(gcf, sprintf('RFs_overlap.pdf'))
+
+
+return
 
 
 %% calc STA & STC  # ONLY FOR SELECTED CHANNELS and inside of RF!
