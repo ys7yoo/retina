@@ -19,10 +19,13 @@ end
 
 
 plot_ellipse(RF.mean, RF.cov, LINE_STYLE, FLIP_XY);
-if FLIP_XY
-    tt=text(RF.mean(2), RF.mean(1), RF.channel_name(4:end), 'HorizontalAlignment','center');
-else
-    tt=text(RF.mean(1), RF.mean(2), RF.channel_name(4:end), 'HorizontalAlignment','center');
-end
-tt.Color = TEXT_COLOR;
+
+if isfield(RF, 'channel_name')
+    if FLIP_XY
+        tt=text(RF.mean(2), RF.mean(1), RF.channel_name(4:end), 'HorizontalAlignment','center');
+    else
+        tt=text(RF.mean(1), RF.mean(2), RF.channel_name(4:end), 'HorizontalAlignment','center');
+    end
+    tt.Color = TEXT_COLOR;
+end    
         

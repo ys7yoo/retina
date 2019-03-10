@@ -179,6 +179,9 @@ selected_channel_names = {'13c', '37c', '58b', '75d', '77d', '16b', '26a', '27a'
 addpath tools
 channel_index_to_analyze = calc_channel_index(channel_names, selected_channel_names)
 
+%% found 8 channels
+
+channel_index_to_analyze = [25    28    91    92    97   101   103   106]
 
 %% 
 channel_index_to_analyze = 1:length(channel_names);
@@ -367,6 +370,14 @@ for n = channel_index_to_analyze
     
     u = u(:,1:num_non_zero_eig_val);
     
+    %% re-fit ellipse to sta_ROI
+    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_ROI{n}+0.5, sta_num_samples, max(XX(mask>0))-min(XX(mask>0))+1, max(YY(mask>0))-min(YY(mask>0))+1, fps, FLIP_XY);
+
+    if ~isempty(strongest_RF)
+        ROI_xy = [min(XX(mask>0))-1 min(YY(mask>0))-1];
+        strongest_RF.mean = strongest_RF.mean + ROI_xy;
+    end
+            
 
     %% identify significant eigen values using bootstraping with nested hypothesis
     disp(['Searching for significant eigenvalues of ' channel_names{n}])
@@ -397,6 +408,7 @@ for n = channel_index_to_analyze
     plot(reshape(sta_ROI{n}, sta_num_samples,[]))
     ylabel('STA')
     box off
+    title(sprintf('STA of %s',channel_names{n}),'Interpreter', 'none')
 
     subplot(r,c,2)
     plot(ev)
@@ -430,19 +442,40 @@ for n = channel_index_to_analyze
             us = reshape(u(:,ii),sta_num_samples,[]);
             plot(us)
 
+            ylabel('STC')
             title (sprintf('STC filter %d',ii))
             box off
 
             
             
             figure(2)   % plot spatial pattern in a separate figure
-            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height, FLIP_XY)
-
+            plot_stim_slices_with_mask(u(:,ii), sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height, FLIP_XY, xy)
+            hold on;
+            %plot_MEA_param(ab,cd)
+            %plot(xy(2), xy(1), 'ro')
+            
             set(gcf, 'paperposition', [0 0 24 9])
             set(gcf, 'papersize', [24 9])
 
-            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.png',channel_names{n},ii))
-            saveas(gcf, sprintf('STC_inside_RF_%s_eig%d.pdf',channel_names{n},ii))
+            saveas(gcf, sprintf('STC_in_ROI_%s_eig%d.png',channel_names{n},ii))
+            saveas(gcf, sprintf('STC_in_ROI_%s_eig%d.pdf',channel_names{n},ii))
+            
+            figure(3) % plot STA for comparison
+            plot_stim_slices_with_mask(sta_ROI{n}, sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height, FLIP_XY, xy, RFs{n})
+            
+            % plot re-fit ellipse
+            if ~isempty(strongest_RF)
+                subplot(2,5, strongest_RF.slice)
+                plot_RF(strongest_RF, ~FLIP_XY)
+            end
+            
+            
+            set(gcf, 'paperposition', [0 0 24 9])
+            set(gcf, 'papersize', [24 9])
+
+            saveas(gcf, sprintf('STA_in_ROI_%s_eig%d.png',channel_names{n},ii))
+            saveas(gcf, sprintf('STA_in_ROI_%s_eig%d.pdf',channel_names{n},ii))
+            
         end
 
         figure(1) % go back to figure 1
