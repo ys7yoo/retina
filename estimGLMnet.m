@@ -287,7 +287,7 @@ for n=channel_index_to_analyze
             TEXT_COLOR = [0 0 1];        
     end
 
-    xy = calc_MEA_location_from_channel_name(channel_names{n}, ab, cd)
+    xy = calc_MEA_location_from_channel_name(channel_names{n}, ab, cd);
 
     
     center = RFs{n}.mean-xy;
@@ -525,6 +525,25 @@ for n = channel_index_to_analyze
 end
 
 
+%% plot numbers of significant eivenvalues
+close all
+bar(num_significant_evs); xlabel('channel index'); ylabel('number of significant eigen values'); box off
+
+title(sprintf('Sigificant eigen values found in %d channels.', sum(num_significant_evs>0)))
+
+set(gca,'ytick',[0 1 2 3])
+
+set(gcf, 'paperposition', [0 0 12 7])
+set(gcf, 'papersize', [12 7])
+
+saveas(gcf, 'num_significatn_eigen_values.pdf')
+saveas(gcf, 'num_significatn_eigen_values.png')
+
+
+%% 
+channels_with_significant_eigen_values = channel_names(num_significant_evs>0)
+
+save channels_with_significant_eigen_values channels_with_significant_eigen_values
 
 
 return 
