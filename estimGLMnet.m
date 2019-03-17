@@ -323,7 +323,7 @@ saveas(gcf, sprintf('RFs_overlap.png'))
 saveas(gcf, sprintf('RFs_overlap.pdf'))
 
 
-return
+%return
 
 
 %% calc STA & STC  # ONLY FOR SELECTED CHANNELS and inside of RF!
@@ -460,23 +460,26 @@ for n = channel_index_to_analyze
             saveas(gcf, sprintf('STC_in_ROI_%s_eig%d.png',channel_names{n},ii))
             saveas(gcf, sprintf('STC_in_ROI_%s_eig%d.pdf',channel_names{n},ii))
             
-            figure(3) % plot STA for comparison
-            plot_stim_slices_with_mask(sta_ROI{n}, sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height, FLIP_XY, xy, RFs{n})
             
-            % plot re-fit ellipse
-            if ~isempty(strongest_RF)
-                subplot(2,5, strongest_RF.slice)
-                plot_RF(strongest_RF, ~FLIP_XY)
-            end
-            
-            
-            set(gcf, 'paperposition', [0 0 24 9])
-            set(gcf, 'papersize', [24 9])
-
-            saveas(gcf, sprintf('STA_in_ROI_%s_eig%d.png',channel_names{n},ii))
-            saveas(gcf, sprintf('STA_in_ROI_%s_eig%d.pdf',channel_names{n},ii))
             
         end
+        
+        figure(3) % plot STA for comparison
+        plot_stim_slices_with_mask(sta_ROI{n}, sta_num_samples, XX(mask(:)>0), YY(mask(:)>0), width, height, FLIP_XY, xy, RFs{n})
+
+        % plot re-fit ellipse
+        if ~isempty(strongest_RF)
+            subplot(2,5, strongest_RF.slice)
+            plot_RF(strongest_RF, ~FLIP_XY)
+        end
+
+
+        set(gcf, 'paperposition', [0 0 24 9])
+        set(gcf, 'papersize', [24 9])
+
+        saveas(gcf, sprintf('STA_in_ROI_%s.png',channel_names{n}))
+        saveas(gcf, sprintf('STA_in_ROI_%s.pdf',channel_names{n}))
+            
 
         figure(1) % go back to figure 1
     else % no significant eigen values 
