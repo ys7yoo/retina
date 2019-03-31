@@ -6,8 +6,11 @@ switch nargout
     case 1   % STA and STC eigen value only (COVARIANCE NOT NEEDED)
         Xs = bsxfun(@times, X, sqrt(spikes));
 
-        [~, D, ~] = svd(Xs);
-        stc_eig_val = diag(D).^2;
+        %[~, D, ~] = svd(Xs);
+        %stc_eig_val = diag(D).^2;
+        s = svd(Xs);
+        stc_eig_val = s.^2;
+        
 
     case 2  % STA and STC eigen value & eiven vectors (COVARIANCE NOT NEEDED)
 
