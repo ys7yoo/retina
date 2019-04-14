@@ -65,6 +65,8 @@ for t=1:T
     %axis tight equal
     axis xy
     %colorbar
+    box off
+    axis off
     
     %% Step 2. calc weighted centers 
     % noise)
