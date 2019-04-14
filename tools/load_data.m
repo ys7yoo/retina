@@ -1,6 +1,7 @@
-function [stim, spike_train, channel_names] = load_data_coupling(folder_name_by_date)
+function [stim, spike_train, channel_names, exp_param] = load_data(folder_name_by_date)
 
 %% 
+exp_param.folder_name_by_date = folder_name_by_date;
 base_folder_name = fullfile('coupling_data', folder_name_by_date);
 
 %% parse info from StimInfo file
@@ -8,16 +9,16 @@ find_stim_info_filename = dir(fullfile(base_folder_name,'Stiminfo*'));
 stim_info_filename = find_stim_info_filename.name;
 
 
-[num_pixels, distance_between_electrodes, sampling_rate] = parse_stim_info_filename(stim_info_filename)
+[num_pixels, distance_between_electrodes, sampling_rate] = parse_stim_info_filename(stim_info_filename);
 
-
-width = num_pixels;
-height = num_pixels;
+exp_param.num_pixels = num_pixels;
+exp_param.distance_between_electrodes = distance_between_electrodes;
+exp_param.sampling_rate = sampling_rate;
 
 %% load 'StimInfo'
 load(fullfile(base_folder_name,stim_info_filename));
 
-T = length(StimInfo);
+% T = length(StimInfo);
 
 stim = cell2mat(StimInfo);
 
@@ -27,24 +28,24 @@ stim = cell2mat(StimInfo);
 %%  plot some sample stimulus
 clf
 subplot(131)
-imshow(reshape(stim(1,:),[height, width]))
+imshow(reshape(stim(1,:),[exp_param.num_pixels, exp_param.num_pixels]))
 xlabel('x');ylabel('y');axis xy
 
 subplot(132)
-imshow(reshape(stim(2,:),[height, width]))
+imshow(reshape(stim(2,:),[exp_param.num_pixels, exp_param.num_pixels]))
 xlabel('x');ylabel('y');axis xy
 
 subplot(133)
-imshow(reshape(stim(3,:),[height, width]))
+imshow(reshape(stim(3,:),[exp_param.num_pixels, exp_param.num_pixels]))
 xlabel('x');ylabel('y');axis xy
 
 %%  load SpikeTrain Dataset & save txt
-spike_train_folder_name = fullfile(base_folder_name, sprintf('SpikeTrain_%s/SpikeTrain_ND2_%dpix_%dum_%dHz',folder_name_by_date,num_pixels, distance_between_electrodes, sampling_rate));
-spike_train_folder_name = [spike_train_folder_name '/']
+exp_param.spike_train_folder_name = fullfile(base_folder_name, sprintf('SpikeTrain_%s/SpikeTrain_ND2_%dpix_%dum_%dHz', exp_param.folder_name_by_date, exp_param.num_pixels, exp_param.distance_between_electrodes, exp_param.sampling_rate));
+exp_param.spike_train_folder_name = [exp_param.spike_train_folder_name '/']
 
-matFiles = dir([spike_train_folder_name '*.mat']);
+matFiles = dir([exp_param.spike_train_folder_name '*.mat']);
 if isempty(matFiles)
-    error(sprintf('Cannot load spike train data from %s',spike_train_folder_name))
+    error(sprintf('Cannot load spike train data from %s', exp_param.spike_train_folder_name))
 end
 matFiles = {matFiles.name};
 
@@ -59,10 +60,10 @@ for i = 1:length(matFiles)
     end
     
     fprintf('Loading %s\n', fileName)
-    load(fullfile(spike_train_folder_name, fileName))
+    load(fullfile(exp_param.spike_train_folder_name, fileName))
     
     % save to txt file
-    save([spike_train_folder_name channel_name '.txt'], channel_name, '-ascii')
+    save([exp_param.spike_train_folder_name channel_name '.txt'], channel_name, '-ascii')
     
 end
 
@@ -73,8 +74,8 @@ N = length(channel_names); % number of neurons
 
 binStim = size(stim,1);
 assert (binStim==length(A1a))
-%spike_train = zeros(binStim,N);
-spike_train = sparse(binStim,N);
+spike_train = zeros(binStim,N);
+%spike_train = sparse(binStim,N);
 
 for n = 1:N
     
