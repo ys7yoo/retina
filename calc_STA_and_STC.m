@@ -40,7 +40,7 @@ if nargout>1
             stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)
             
         case 4 % full algorithm with covariance
-            [stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes)
+            [stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes);
                         
             stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)
             
