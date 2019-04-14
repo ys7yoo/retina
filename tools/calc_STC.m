@@ -9,6 +9,7 @@ switch nargout
         %[~, D, ~] = svd(Xs);
         %stc_eig_val = diag(D).^2;
         s = svd(Xs);
+
         stc_eig_val = s.^2;
         
 
