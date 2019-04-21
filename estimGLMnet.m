@@ -21,6 +21,9 @@ clear
 % unified loaindg routine
 base_folder_name = 'data/20180905_26x26'
 
+%base_folder_name = 'data/20180828_ReceptiveField_TemporalFilter'
+
+
 [stim, spike_train, channel_names, exp_param] = load_data(base_folder_name);
 
 exp_param.num_electrodes_per_dim = 8;
@@ -156,7 +159,7 @@ gridT = (-sta_num_samples+1:0)/sampling_rate;
 
 %channels_to_analyze = 1:length(channel_names);
 %channels_to_analyze = 8;
-%% 1. calc STA first (STC is too slow)
+%% 1. calc STA first
 
 disp('running STA for all the channels...')
 clear sta_all_channels
@@ -247,7 +250,20 @@ end
 
 
 %% analyze RF centers
-[ab, cd] = fit_RF_center_onto_MEA(RFs, channel_names);
+[ab, cd] = fit_RF_center_onto_MEA_general(RFs, channel_names);
+%[ab, cd] = fit_RF_center_onto_MEA(RFs, channel_names);  % for fixed scale
+
+if isinf(ab(1))
+    disp('Cannot fit with a single channel. Put ROI manually!')
+end
+
+
+
+set(gcf, 'paperposition', [0 0 24 20])
+set(gcf, 'papersize', [24 20])
+
+saveas(gcf, sprintf('fit_RF_onto_MEA.png'))
+saveas(gcf, sprintf('fit_RF_onto_MEA.pdf'))
 
 
 %% plot mosaic
@@ -315,29 +331,42 @@ for n=channel_index_to_analyze
     text(center(2),center(1), channel_names{n}(4:end), 'HorizontalAlignment','center')
         
 end
+axis xy
 %plot_MEA_param(ab, cd)
-title ('RF with MEA as origin')
-
 
 % ROI +-6 seems to be OK
 
 %roi_size = 6; % +- 6 pixels . TOO SLOW
-roi_size = 3; % +- 3 pixels
+%roi_size = 3; % +- 3 pixels
+%roi_size = mean([ab(1); -cd(1)]);       
 
-plot([-1 1]*roi_size, [-1 -1]*roi_size, 'k--', 'linewidth',2)
-plot([-1 1]*roi_size, [1 1]*roi_size, 'k--', 'linewidth',2)
-plot([-1 -1]*roi_size, [-1 1]*roi_size, 'k--', 'linewidth',2)
-plot([1 1]*roi_size, [-1 1]*roi_size, 'k--', 'linewidth',2)
+% measured spacing between electrodes
+inter_electrode_space_x=-cd(1)
+inter_electrode_space_y=ab(1)
 
+plot([-inter_electrode_space_y inter_electrode_space_y], [-inter_electrode_space_x -inter_electrode_space_x], 'k--', 'linewidth',2)
+plot([-inter_electrode_space_y inter_electrode_space_y], [inter_electrode_space_x inter_electrode_space_x], 'k--', 'linewidth',2)
+plot([-inter_electrode_space_y -inter_electrode_space_y], [-inter_electrode_space_x inter_electrode_space_x], 'k--', 'linewidth',2)
+plot([inter_electrode_space_y inter_electrode_space_y], [-inter_electrode_space_x inter_electrode_space_x], 'k--', 'linewidth',2)
+
+title (sprintf('RF with MEA as origin (inter-electrode space in pixels=(%.1f,%.1f)',inter_electrode_space_y,inter_electrode_space_x))
 
 set(gcf, 'paperposition', [0 0 24 20])
 set(gcf, 'papersize', [24 20])
+
+xlabel('x')
+ylabel('y')
 
 saveas(gcf, sprintf('RFs_overlap.png'))
 saveas(gcf, sprintf('RFs_overlap.pdf'))
 
 
-%return
+%% set ROI here
+
+roi_size = round(mean([inter_electrode_space_x; inter_electrode_space_y]))
+
+
+
 
 
 %% calc STA & STC  # ONLY FOR SELECTED CHANNELS and inside of RF!
