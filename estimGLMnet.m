@@ -18,115 +18,129 @@ addpath tools
 clear
 
 
+% unified loaindg routine
+base_folder_name = 'data/20180905_26x26'
 
-% for loading 13x13 stim (20180828)
-% load_data_13x13 
+[stim, spike_train, channel_names, exp_param] = load_data(base_folder_name);
 
-% for loading 26x26 stim (20180905)
-load_data_26x26 
+exp_param.num_electrodes_per_dim = 8;
+exp_param.inter_electrode_space = 200 % manually set (100 um)
+%exp_param.electrod_diameter = 30;
 
 
-% % %% First, run STA independently for all the channels 
-% % %W = 1; % Window in sec
-% % %W = 0.8; % Window in sec
-% % %W = 0.5; % Window in sec
-% % W = 0.6; % Window in sec
+%sampling_rate, width, height
+sampling_rate = exp_param.sampling_rate;
+width = exp_param.num_pixels_per_dim;
+height = exp_param.num_pixels_per_dim;
+
+
+% % % for loading 13x13 stim (20180828)
+% % % load_data_13x13 
+% % 
+% % % for loading 26x26 stim (20180905)
+% % % load_data_26x26 
+% % 
+% % % % %% First, run STA independently for all the channels 
+% % % % %W = 1; % Window in sec
+% % % % %W = 0.8; % Window in sec
+% % % % %W = 0.5; % Window in sec
+% % % % W = 0.6; % Window in sec
+% % % % 
+% % % % 
+% % % % clear STAall
+% % % % clear STAs  % STAs will be stored here
+% % % % 
+% % % % for i = 1:length(channel_names)
+% % % %     
+% % % %     channel_name = channel_names{i}
+% % % %     spike_time=eval(channel_name);
+% % % %     
+% % % %     [STA, gridT] = calcSTAprestim(stim, A1a, spike_time, W, fps);
+% % % %     %save STA
+% % % %     STAall{i} = STA;
+% % % % 
+% % % %     
+% % % %     %figure(i)
+% % % %     clf
+% % % %     STA_max_var = find_STA_with_max_var(STA, gridT, width, height)
+% % % %     
+% % % %     STAs(:,i) = STA_max_var; % store STA with maximum variance (center)
+% % % %     
+% % % %     % save figure 
+% % % %     set(gcf, 'paperposition', [0 0 12 10])
+% % % %     set(gcf, 'papersize', [12 10])
+% % % % 
+% % % %     saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channel_name))
+% % % %     
+% % % % end
+% % % % 
+% % % % % plot STAs of multiple cells
+% % % % clf
+% % % % plot(gridT, STAs, 'linewidth',2)
+% % % % ylabel('stim intensity')
+% % % % xlabel('t')
+% % % % title('STAs with the largest variance')
+% % % % box off
+% % % % 
+% % % % legend(channel_names, 'location', 'NW','Interpreter', 'none'); legend boxoff
+% % % % 
+% % % % 
+% % % % set(gcf, 'paperposition', [0 0 6 4])
+% % % % set(gcf, 'papersize', [6 4])
+% % % % 
+% % % % saveas(gcf, sprintf('%scell_%dHz_STAs.pdf', CELL_TYPE, fps))
 % % 
 % % 
-% % clear STAall
-% % clear STAs  % STAs will be stored here
 % % 
-% % for i = 1:length(channel_names)
+% % %% For further analysis, need to convert spike time to spike train
+% % 
+% % N = length(channel_names); % number of neurons 
+% % 
+% % binStim = size(stim,1);
+% % assert (binStim==length(A1a))
+% % spike_train = zeros(binStim,N);
+% % 
+% % for n = 1:N
 % %     
-% %     channel_name = channel_names{i}
+% %     channel_name = channel_names{n};
+% %     disp(channel_name)
 % %     spike_time=eval(channel_name);
 % %     
-% %     [STA, gridT] = calcSTAprestim(stim, A1a, spike_time, W, fps);
-% %     %save STA
-% %     STAall{i} = STA;
+% %     
+% %     % let's check for each stim time bin
+% %     for i = 2:binStim
+% %         t0 = A1a(i-1);
+% %         t1 = A1a(i);
 % % 
-% %     
-% %     %figure(i)
-% %     clf
-% %     STA_max_var = find_STA_with_max_var(STA, gridT, width, height)
-% %     
-% %     STAs(:,i) = STA_max_var; % store STA with maximum variance (center)
-% %     
-% %     % save figure 
-% %     set(gcf, 'paperposition', [0 0 12 10])
-% %     set(gcf, 'papersize', [12 10])
+% %         % find stim time that occured during t0 and t1
+% %         idx = find(spike_time>t0 & spike_time<=t1);
 % % 
-% %     saveas(gcf, sprintf('%scell_%dHz_%s_STA.pdf', CELL_TYPE, fps, channel_name))
-% %     
+% %         spike_train(i,n) = length(idx);  % multiple spikes may occur in a bin
+% % %         if ~isempty(idx)
+% % %             %disp('found')
+% % %             spike_train(i,n) = 1;
+% % %         end
+% % 
+% %     end
 % % end
 % % 
-% % % plot STAs of multiple cells
+% % 
 % % clf
-% % plot(gridT, STAs, 'linewidth',2)
-% % ylabel('stim intensity')
-% % xlabel('t')
-% % title('STAs with the largest variance')
-% % box off
+% % imagesc(spike_train', [0 1]); colormap gray
 % % 
-% % legend(channel_names, 'location', 'NW','Interpreter', 'none'); legend boxoff
-% % 
-% % 
-% % set(gcf, 'paperposition', [0 0 6 4])
-% % set(gcf, 'papersize', [6 4])
-% % 
-% % saveas(gcf, sprintf('%scell_%dHz_STAs.pdf', CELL_TYPE, fps))
-
-
-
-%% For further analysis, need to convert spike time to spike train
-
-N = length(channel_names); % number of neurons 
-
-binStim = size(stim,1);
-assert (binStim==length(A1a))
-spike_train = zeros(binStim,N);
-
-for n = 1:N
-    
-    channel_name = channel_names{n};
-    disp(channel_name)
-    spike_time=eval(channel_name);
-    
-    
-    % let's check for each stim time bin
-    for i = 2:binStim
-        t0 = A1a(i-1);
-        t1 = A1a(i);
-
-        % find stim time that occured during t0 and t1
-        idx = find(spike_time>t0 & spike_time<=t1);
-
-        spike_train(i,n) = length(idx);  % multiple spikes may occur in a bin
-%         if ~isempty(idx)
-%             %disp('found')
-%             spike_train(i,n) = 1;
-%         end
-
-    end
-end
-
-
-clf
-imagesc(spike_train', [0 1]); colormap gray
-
-% % Simple code below does NOT work due to time jitter!!!
-% % grab spike_time during stim & convert to bin idx
-% idx = (spike_time >= A1a(1)) & (spike_time < A1a(end));
-% binIdx = round(spike_time(idx)*fps);  
-% %idx = ceil(spike_time*fps) % does it matter?
-% spike_train(binIdx) = 1;
-% spike_train = spike_train(:);
-% 
-% % cut spike train length to be the same as stim time length
-% T = size(StimChosen,1);
-% if length(spike_train) > T
-%     spike_train = spike_train(1:T);
-% end
+% % % % Simple code below does NOT work due to time jitter!!!
+% % % % grab spike_time during stim & convert to bin idx
+% % % idx = (spike_time >= A1a(1)) & (spike_time < A1a(end));
+% % % binIdx = round(spike_time(idx)*fps);  
+% % % %idx = ceil(spike_time*fps) % does it matter?
+% % % spike_train(binIdx) = 1;
+% % % spike_train = spike_train(:);
+% % % 
+% % % % cut spike train length to be the same as stim time length
+% % % T = size(StimChosen,1);
+% % % if length(spike_train) > T
+% % %     spike_train = spike_train(1:T);
+% % % end
 
 
 
@@ -137,7 +151,7 @@ close all
 % sta params
 %sta_num_samples = 16;
 sta_num_samples = 10; % for 30Hz
-gridT = (-sta_num_samples+1:0)/fps;
+gridT = (-sta_num_samples+1:0)/sampling_rate;
 
 
 %channels_to_analyze = 1:length(channel_names);
@@ -215,7 +229,7 @@ for n = channel_index_to_analyze
     clf
     
     
-    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, sta_num_samples, width, height, fps, FLIP_XY);
+    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, sta_num_samples, width, height, sampling_rate, FLIP_XY);
     strongest_RF.channel_name = channel_names{n};
     set(gcf, 'paperposition', [0 0 24 9])
     set(gcf, 'papersize', [24 9])
@@ -371,7 +385,7 @@ for n = channel_index_to_analyze
     u = u(:,1:num_non_zero_eig_val);
     
     %% re-fit ellipse to sta_ROI
-    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_ROI{n}+0.5, sta_num_samples, max(XX(mask>0))-min(XX(mask>0))+1, max(YY(mask>0))-min(YY(mask>0))+1, fps, FLIP_XY);
+    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_ROI{n}+0.5, sta_num_samples, max(XX(mask>0))-min(XX(mask>0))+1, max(YY(mask>0))-min(YY(mask>0))+1, sampling_rate, FLIP_XY);
 
     if ~isempty(strongest_RF)
         ROI_xy = [min(XX(mask>0))-1 min(YY(mask>0))-1];
@@ -931,6 +945,7 @@ saveas(gcf, sprintf('coupling-filters-basis_%dHz.png',fps))
 %ggInit = makeFittingStruct_GLM(dtStim,dtSp);  % Initialize params for fitting struct 
 
 nkt  = size(STA,1);  % number of bins for stimulus filter
+%nkt = 10;
 nkbasis = 2
 ggInit = makeFittingStruct_GLM(dtStim,dtSpike,nkt,nkbasis,STA)
 

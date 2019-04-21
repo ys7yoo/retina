@@ -12,9 +12,9 @@ spike_train_folder_name = dir(fullfile(base_folder_name,'SpikeTrain_*'));
 spike_train_folder_name=spike_train_folder_name.name;
 
 
-[num_pixels, pixel_size, sampling_rate] = parse_stim_info_filename(stim_info_filename);
+[num_pixels_per_dim, pixel_size, sampling_rate] = parse_stim_info_filename(stim_info_filename);
 
-exp_param.num_pixels = num_pixels;
+exp_param.num_pixels_per_dim = num_pixels_per_dim;
 exp_param.pixel_size = pixel_size;
 exp_param.sampling_rate = sampling_rate;
 
@@ -25,25 +25,25 @@ load(fullfile(base_folder_name,stim_info_filename));
 
 stim = cell2mat(StimInfo);
 
-%size(stim) % 9000 x num_pixels x num_pixels
+%size(stim) % 9000 x num_pixels_per_dim x num_pixels_per_dim
 
 
 %%  plot some sample stimulus
 clf
 subplot(131)
-imshow(reshape(stim(1,:),[exp_param.num_pixels, exp_param.num_pixels]))
+imshow(reshape(stim(1,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
 xlabel('x');ylabel('y');axis xy
 
 subplot(132)
-imshow(reshape(stim(2,:),[exp_param.num_pixels, exp_param.num_pixels]))
+imshow(reshape(stim(2,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
 xlabel('x');ylabel('y');axis xy
 
 subplot(133)
-imshow(reshape(stim(3,:),[exp_param.num_pixels, exp_param.num_pixels]))
+imshow(reshape(stim(3,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
 xlabel('x');ylabel('y');axis xy
 
 %%  load SpikeTrain Dataset & save txt
-exp_param.spike_train_folder_name = fullfile(base_folder_name, sprintf('%s/SpikeTrain_ND2_%dpix_%dum_%dHz', spike_train_folder_name, exp_param.num_pixels, exp_param.pixel_size, exp_param.sampling_rate));
+exp_param.spike_train_folder_name = fullfile(base_folder_name, sprintf('%s/SpikeTrain_ND2_%dpix_%dum_%dHz', spike_train_folder_name, exp_param.num_pixels_per_dim, exp_param.pixel_size, exp_param.sampling_rate));
 exp_param.spike_train_folder_name = [exp_param.spike_train_folder_name '/']
 
 matFiles = dir([exp_param.spike_train_folder_name '*.mat']);
