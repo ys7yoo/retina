@@ -49,34 +49,39 @@ subplot(221)
 plot(MEA_xy(:,1), RF_center(:,2),'o'); hold on
 xlabel('channel index 1')
 ylabel('RF_y')
+box off
+
 subplot(222)
 plot(MEA_xy(:,2), RF_center(:,1),'s')
 xlabel('channel index 2')
 ylabel('RF_x')
-
+box off
 
 % plot fitted results
 subplot(221)
 hold on 
 plot([1 8], [[1 1]*ab, [8 1]*ab], 'r--')
 title(sprintf(' y = %.1f x + %.1f', ab(1), ab(2)))
+box off
 
 subplot(222)
 hold on 
 plot([1 8], [[1 1]*cd, [8 1]*cd], 'r--')
 title(sprintf(' y = %.1f x + %.1f', cd(1), cd(2)))
 %[8 1]*ab
+box off
 
 % residual
 subplot(223)
 plot(MEA_xy(:,1), RF_center(:,2)-[MEA_xy(:,1) ones(N,1)]*ab, 'o')
 xlabel('channel index 1')
 ylabel('residual y')
+box off
 
 subplot(224)
 plot(MEA_xy(:,2), RF_center(:,1)-[MEA_xy(:,2) ones(N,1)]*cd, 'o')
 xlabel('channel index 2')
 ylabel('residual x')
-
+box off
 
 return

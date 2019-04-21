@@ -5,7 +5,21 @@ function [stim, spike_train, channel_names, exp_param] = load_data(base_folder_n
 
 %% parse info from StimInfo file
 find_stim_info_filename = dir(fullfile(base_folder_name,'Stiminfo*'));
-stim_info_filename = find_stim_info_filename.name;
+
+num_stim_info_files=length(find_stim_info_filename);
+if num_stim_info_files>1
+    % there may be multiple files!
+    disp('There are multiple files in the folder.')
+    for i=1:num_stim_info_files
+        disp(sprintf("%d: %s", i, find_stim_info_filename(i).name))
+    end
+    idx = input('Choose the index from above. ');
+    stim_info_filename = find_stim_info_filename(idx).name;
+else
+    stim_info_filename = find_stim_info_filename.name;
+    
+end
+
 
 %% parse info from StimTrain folder
 spike_train_folder_name = dir(fullfile(base_folder_name,'SpikeTrain_*'));
