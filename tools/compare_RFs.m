@@ -52,8 +52,11 @@ end
 % save figure
 
 
-set(gcf, 'paperposition', [0 0 24 20])
-set(gcf, 'papersize', [24 20])
+set(gcf, 'paperposition', [0 0 12 10])
+set(gcf, 'papersize', [12 10])
+
+fig_filename= sprintf('RFs_%s_vs_%s.png',channel_names{1}(4:end),channel_names{2}(4:end));
+saveas(gcf, fig_filename)
 
 fig_filename= sprintf('RFs_%s_vs_%s.pdf',channel_names{1}(4:end),channel_names{2}(4:end));
 saveas(gcf, fig_filename)
