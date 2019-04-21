@@ -17,8 +17,8 @@ addpath([basedir '/glmtools_spline/']);
 clear
 addpath tools
 
-folder_name_by_date='20180524'
-%folder_name_by_date='20180618'
+%folder_name_by_date='20180524'
+folder_name_by_date='20180618'
 %folder_name_by_date='20180828'
 %folder_name_by_date='20180905'      % response is too weak
 %folder_name_by_date='20181004'      % response is too weak
@@ -39,6 +39,8 @@ close all
 sta_num_samples = 10; % for 30Hz
 % gridT = (-sta_num_samples+1:0)/sampling_rate;
 
+%sta_num_samples = ceil(sampling_rate*0.66);  % consider 660 ms prior to spike
+%sta_num_samples = floor(sampling_rate*1);  % consider 660 ms prior to spike
 
 %channels_to_analyze = 1:length(channel_names);
 %channels_to_analyze = 8;
