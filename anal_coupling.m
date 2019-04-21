@@ -17,12 +17,23 @@ addpath([basedir '/glmtools_spline/']);
 clear
 addpath tools
 
-%folder_name_by_date='20180524'
-folder_name_by_date='20180618'
-%folder_name_by_date='20180828'
-%folder_name_by_date='20180905'      % response is too weak
-%folder_name_by_date='20181004'      % response is too weak
-[stim, spike_train, channel_names, exp_param] = load_data(folder_name_by_date);
+
+% exp_param.exp_date = exp_date_str;
+% data_folder_name = fullfile(base_folder_name, exp_date_str);
+
+
+% base_folder_name = 'coupling_data/20180524'
+% base_folder_name = 'coupling_data/20180618'
+base_folder_name = 'coupling_data/20180828'
+% base_folder_name = 'coupling_data/20180905' % response is too weak
+% base_folder_name = 'coupling_data/20181004' % response is too weak
+
+[stim, spike_train, channel_names, exp_param] = load_data(base_folder_name);
+
+exp_param.num_electrodes_per_dim = 8;
+exp_param.inter_electrode_space = 200 % manually set (100 um)
+%exp_param.electrod_diameter = 30;
+
 
 %sampling_rate, width, height
 sampling_rate = exp_param.sampling_rate;
@@ -90,6 +101,7 @@ axis xy
 axis ([1 width+2  2 height+4])
 
 %plot_MEA(offset_X, offset_Y)
+%calc_MEA_loca
 if exist('ab')
     plot_MEA_param(ab, cd);
 end
@@ -604,7 +616,7 @@ end
 % end
 % set(gcf, 'paperposition', [0 0 8 8])
 % set(gcf, 'papersize', [8 8])
-% saveas(gcf, sprintf('%s_%dHz_STA_vs_GLM.pdf', folder_name_by_date,fps))
+% saveas(gcf, sprintf('%s_%dHz_STA_vs_GLM.pdf', exp_date,fps))
 
 
 %% plot coupling filters

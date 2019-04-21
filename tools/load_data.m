@@ -1,12 +1,15 @@
-function [stim, spike_train, channel_names, exp_param] = load_data(folder_name_by_date)
+function [stim, spike_train, channel_names, exp_param] = load_data(base_folder_name)
 
 %% 
-exp_param.folder_name_by_date = folder_name_by_date;
-data_folder_name = fullfile('coupling_data', folder_name_by_date);
+
 
 %% parse info from StimInfo file
-find_stim_info_filename = dir(fullfile(data_folder_name,'Stiminfo*'));
+find_stim_info_filename = dir(fullfile(base_folder_name,'Stiminfo*'));
 stim_info_filename = find_stim_info_filename.name;
+
+%% parse info from StimTrain folder
+spike_train_folder_name = dir(fullfile(base_folder_name,'SpikeTrain_*'));
+spike_train_folder_name=spike_train_folder_name.name;
 
 
 [num_pixels, pixel_size, sampling_rate] = parse_stim_info_filename(stim_info_filename);
@@ -16,7 +19,7 @@ exp_param.pixel_size = pixel_size;
 exp_param.sampling_rate = sampling_rate;
 
 %% load 'StimInfo'
-load(fullfile(data_folder_name,stim_info_filename));
+load(fullfile(base_folder_name,stim_info_filename));
 
 % T = length(StimInfo);
 
@@ -40,7 +43,7 @@ imshow(reshape(stim(3,:),[exp_param.num_pixels, exp_param.num_pixels]))
 xlabel('x');ylabel('y');axis xy
 
 %%  load SpikeTrain Dataset & save txt
-exp_param.spike_train_folder_name = fullfile(data_folder_name, sprintf('SpikeTrain_%s/SpikeTrain_ND2_%dpix_%dum_%dHz', exp_param.folder_name_by_date, exp_param.num_pixels, exp_param.pixel_size, exp_param.sampling_rate));
+exp_param.spike_train_folder_name = fullfile(base_folder_name, sprintf('%s/SpikeTrain_ND2_%dpix_%dum_%dHz', spike_train_folder_name, exp_param.num_pixels, exp_param.pixel_size, exp_param.sampling_rate));
 exp_param.spike_train_folder_name = [exp_param.spike_train_folder_name '/']
 
 matFiles = dir([exp_param.spike_train_folder_name '*.mat']);
