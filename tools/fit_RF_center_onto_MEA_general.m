@@ -19,6 +19,14 @@ end
 %% 
 N = size(RF_center,1)
 
+if N<2
+    disp('not enough RFs')
+    
+    ab = nan;
+    cd = nan;
+    
+    return
+end
 
 %% 
 clf

@@ -15,16 +15,26 @@ theta = linspace(0,2*pi);
 
 circ = [cos(theta') sin(theta')];
 
-ellipse = avg + circ*chol(covariance)*diag([2.4477, 2.4477]);
+if max(covariance(:)) > 0
+    % disp(covariance)
+    ellipse = avg + circ*chol(covariance+diag([eps, eps]))*diag([2.4477, 2.4477]);
 
 
-if ~FLIP_XY
-    %plot(circ(:,1), circ(:,2), 'k--'); hold on
-    plot(ellipse(:,1), ellipse(:,2), LINE_TYPE); 
-else
-    plot(ellipse(:,2), ellipse(:,1), LINE_TYPE); 
+    if ~FLIP_XY
+        %plot(circ(:,1), circ(:,2), 'k--'); hold on
+        plot(ellipse(:,1), ellipse(:,2), LINE_TYPE); 
+    else
+        plot(ellipse(:,2), ellipse(:,1), LINE_TYPE); 
+    end
+else % single pixel
+    if ~FLIP_XY
+        plot(avg(:,1), avg(:,2), ['o' LINE_TYPE])
+    else
+        plot(avg(:,2), avg(:,1), ['o' LINE_TYPE])
+    end
+        
+
 end
-
 
 return
 

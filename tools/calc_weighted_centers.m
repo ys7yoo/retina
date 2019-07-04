@@ -1,6 +1,8 @@
-function [center_pos, cov_pos, num_pos_pixels, center_neg, cov_neg, num_neg_pixels] = calc_weighted_centers(slice, X, Y, threshold)
+function [center_pos, cov_pos, num_pos_pixels, center_neg, cov_neg, num_neg_pixels] = calc_weighted_centers(slice, X, Y, ref_value, threshold)
 
-ref_value = 0.5;
+% if nargin < 5
+%     ref_value = 0.5;
+% end
 
 positive_values=max(slice - ref_value-threshold,0);
 negative_values=max(ref_value-slice-threshold,0);

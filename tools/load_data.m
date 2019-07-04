@@ -1,8 +1,5 @@
 function [stim, spike_train, channel_names, exp_param] = load_data(base_folder_name)
 
-%% 
-
-
 %% parse info from StimInfo file
 find_stim_info_filename = dir(fullfile(base_folder_name,'Stiminfo*'));
 
@@ -38,23 +35,31 @@ load(fullfile(base_folder_name,stim_info_filename));
 % T = length(StimInfo);
 
 stim = cell2mat(StimInfo);
-
 %size(stim) % 9000 x num_pixels_per_dim x num_pixels_per_dim
 
 
 %%  plot some sample stimulus
-clf
-subplot(131)
+%clf
+figure
+subplot(141)
 imshow(reshape(stim(1,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
-xlabel('x');ylabel('y');axis xy
+%xlabel('x');ylabel('y');
+axis xy
 
-subplot(132)
+subplot(142)
 imshow(reshape(stim(2,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
-xlabel('x');ylabel('y');axis xy
+%xlabel('x');ylabel('y');
+axis xy
 
-subplot(133)
+subplot(143)
 imshow(reshape(stim(3,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
-xlabel('x');ylabel('y');axis xy
+%xlabel('x');ylabel('y');
+axis xy
+
+subplot(144)
+imshow(reshape(stim(4,:),[exp_param.num_pixels_per_dim, exp_param.num_pixels_per_dim]))
+%xlabel('x');ylabel('y');
+axis xy
 
 %%  load SpikeTrain Dataset & save txt
 exp_param.spike_train_folder_name = fullfile(base_folder_name, sprintf('%s/SpikeTrain_ND2_%dpix_%dum_%dHz', spike_train_folder_name, exp_param.num_pixels_per_dim, exp_param.pixel_size, exp_param.sampling_rate));
@@ -102,7 +107,7 @@ for n = 1:N
     
     
     % let's check for each stim time bin
-    for i = 2:binStim
+    for i = 2:length(A1a)
         t0 = A1a(i-1);
         t1 = A1a(i);
 
@@ -118,8 +123,8 @@ for n = 1:N
     end
 end
 
-
-clf
+figure
+%clf
 imagesc(spike_train', [0 1]); colormap gray
-
-
+xlabel('t')
+ylabel('channel')

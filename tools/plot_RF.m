@@ -4,17 +4,23 @@ if nargin<2
     FLIP_XY = false;
 end
 
-if ~isfield(RF, 'type')
+if isempty(RF)
     return
 end
 
-switch RF.type
-    case 'ON'
-        LINE_STYLE = 'r-';
-        TEXT_COLOR = [1 0 0];
-    case 'OFF'
-        LINE_STYLE = 'b-';
-        TEXT_COLOR = [0 0 1];        
+if isfield(RF, 'type')
+    switch RF.type
+        case 'ON'
+            LINE_STYLE = 'r-';
+            TEXT_COLOR = [1 0 0];
+        case 'OFF'
+            LINE_STYLE = 'b-';
+            TEXT_COLOR = [0 0 1];
+    end
+else
+    % default line style
+    LINE_STYLE = 'g-';
+    TEXT_COLOR = [0 1 0];    
 end
 
 

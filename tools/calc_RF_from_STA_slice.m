@@ -71,7 +71,8 @@ for t=1:T
     %% Step 2. calc weighted centers 
     % noise)
     slice_smoothed = smooth_STA_slice(slice, 1.0, width, height);
-    [pos_center, pos_cov, num_pos_pixels, neg_center, neg_cov, num_neg_pixels] =  calc_weighted_centers(slice_smoothed, width, height, 2.58*sig);
+    [pos_center, pos_cov, num_pos_pixels, neg_center, neg_cov, num_neg_pixels] =  calc_weighted_centers(slice_smoothed, width, height, 0.5, 2.58*sig);
+    %[pos_center, pos_cov, num_pos_pixels, neg_center, neg_cov, num_neg_pixels] =  calc_weighted_centers(slice_smoothed, width, height, 0.5, 1.96*sig);  % 95% confidence interval
     hold on
     
     %% Step 3. plot ellipses (95% significant)

@@ -41,10 +41,11 @@ for i=1:sta_num_samples
     %surf(reshape(st(i,:,:),h,w))
     colormap gray
     axis xy
+    hold on
     
     %% mark MEA
     if ~isempty(MEA_xy)
-        hold on
+        
         if FLIP_XY
             plot(MEA_xy(1), MEA_xy(2), 'go')
         else
@@ -60,13 +61,13 @@ for i=1:sta_num_samples
                 case 'ON'            
                     plot_ellipse(RF.mean, RF.cov, 'r--')
                 case 'OFF'
-                    plot_ellipse(RF.mean, RF.cov, 'b--')                    
+                    plot_ellipse(RF.mean, RF.cov, 'b--')
             end
         end
     end
     
     %% zoon in masks
-    axis([min(XX(:)) max(XX(:)) min(YY(:)) max(YY(:))])
+    %axis([min(XX(:)) max(XX(:)) min(YY(:)) max(YY(:))])
     
     %%
     if FLIP_XY
