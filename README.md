@@ -9,5 +9,5 @@
 * See [`demo_sta_vs_stc.m`](demo_sta_vs_stc.m)
 
 ## [FUTURE WORK] Combine GLM analysis
-1. Install [GLMspiketools](https://github.com/ys7yoo/GLMspiketools) developed by J. Pillow.
+1. Install [GLMspiketools](https://github.com/ys7yoo/GLMspiketools) developed by [J. Pillow](https://github.com/pillowlab/GLMspiketools).
 2. Run `estimGLM.m` to calc STA, GLM, and bilinear GLM for some chosen channels.
