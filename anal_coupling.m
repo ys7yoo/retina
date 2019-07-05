@@ -28,6 +28,9 @@ base_folder_name = 'coupling_data/20180828'
 % base_folder_name = 'coupling_data/20180905' % response is too weak
 % base_folder_name = 'coupling_data/20181004' % response is too weak
 
+
+base_folder_name = 'data/20180905_26x26'
+
 [stim, spike_train, channel_names, exp_param] = load_data(base_folder_name);
 
 exp_param.num_electrodes_per_dim = 8;
@@ -37,8 +40,8 @@ exp_param.inter_electrode_space = 200 % manually set (100 um)
 
 %sampling_rate, width, height
 sampling_rate = exp_param.sampling_rate;
-width = exp_param.num_pixels;
-height = exp_param.num_pixels;
+width = exp_param.num_pixels_per_dim;
+height = exp_param.num_pixels_per_dim;
 
 %% Run STA
 %% Let's calc STA and STC
