@@ -1,4 +1,4 @@
-# retina project (collaboration with CBNU College of Medicine)
+# Retina Project (collaboration with CBNU College of Medicine)
 
 ## Core functions
 * [`load_data.m`](load_data.m) - load random stimulus and spike time info from mat files (and save them to txt files)
