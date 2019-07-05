@@ -15,7 +15,7 @@ retina project (collaboration with CBNU College of Medicine)
 * estimGLM.m - calc STA, GLM, and bilinear GLM (for some channels)
 
 
-## How to run STA
+## How to run STA and STC
 1. Setup expriment number and foldernames in `loadData.m`.
 2. Run `runSTAbatch.m` to calc STA for all the channels.
 
