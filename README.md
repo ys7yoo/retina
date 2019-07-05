@@ -1,25 +1,15 @@
 # retina
 retina project (collaboration with CBNU College of Medicine)
 
-## Updated Codes (May 28, 2018)
-* loadData.m - load data in mat files (and save to txt files)
-* calcSTAprestim.m - calcSTA using "pre stim"
-* runSTAprestim.m - run STA for a channel
 
-
-## Codes
-* loadData.m - load data in mat files (and save to txt files)
-* runSTA.m - run STA for a channel
-* runSTAbatch.m - run STA for all the channels
-* calcSTA.m - core function to calc STA
-* estimGLM.m - calc STA, GLM, and bilinear GLM (for some channels)
-
+## Core functions (July 4, 2019)
+* `loadData.m` - load random stimulus and spike time info from mat files (and save them to txt files)
+* `calc_STA_and_STC.m` - calculate STA and STC
+* `find_significant_eigen_values.m` - find significant eigen values of STC using a nested hypothesis test
 
 ## How to run STA and STC
-1. Setup expriment number and foldernames in `loadData.m`.
-2. Run `runSTAbatch.m` to calc STA for all the channels.
+* See `demo_sta_vs_stc.m`
 
-
-## How to run GLM
+## [FUTURE WORK] Combine GLM analysis
 1. Install [GLMspiketools](https://github.com/ys7yoo/GLMspiketools) developed by J. Pillow.
 2. Run `estimGLM.m` to calc STA, GLM, and bilinear GLM for some chosen channels.
