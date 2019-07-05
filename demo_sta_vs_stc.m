@@ -461,7 +461,7 @@ end
 
 
 %% plot numbers of significant eivenvalues
-close all
+figure
 bar(num_significant_evs); xlabel('channel index'); ylabel('number of significant eigen values'); box off
 
 title(sprintf('Sigificant eigen values found in %d channels.', sum(num_significant_evs>0)))
