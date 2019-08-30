@@ -97,10 +97,20 @@ ylabel('count of projected values')
 box off
 title(sprintf('histogram of projected values for PC_2 (var=%.2f)',vars(2)))
 
+
+
+set(gcf, 'paperposition', [0 0 20 18])
+set(gcf, 'papersize', [20 18])
+saveas(gcf, 'simulation1.pdf')
+saveas(gcf, 'simulation1.png')
+
+
 %% plot mixed samples in one image
 %subplot(223)
 figure(2)
-clf; hold on
+clf; 
+subplot(121)
+hold on
 %plot(X_mix(:,1), X_mix(:,2), 'og')
 plot(X(:,1), X(:,2), '+b')
 %plot(X_filtered(:,1), X_filtered(:,2), 'or')
@@ -120,10 +130,18 @@ xlabel('PC_1')
 ylabel('PC_2')
 
 
-set(gcf, 'paperposition', [0 0 12 10])
-set(gcf, 'papersize', [12 10])
-saveas(gcf, 'simulation.pdf')
-saveas(gcf, 'simulation.png')
+
+subplot(122)
+hist(projected)
+title('histogram of projected values')
+legend (sprintf('PC_1 (var=%.2f)', vars(1)), sprintf('PC_2 (var=%.2f)', vars(2)))
+box off
+
+
+set(gcf, 'paperposition', [0 0 32 10])
+set(gcf, 'papersize', [32 10])
+saveas(gcf, 'simulation2.pdf')
+saveas(gcf, 'simulation2.png')
 
 % %% Mix the dataset 
 % 
