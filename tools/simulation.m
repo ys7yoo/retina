@@ -4,7 +4,8 @@ N1 = 1000
 N2 = 1000
 dim = 2
 
-AXIS = [-3.5 3.5 -3.5 3.5]
+%AXIS = [-3.5 3.5 -3.5 3.5]
+AXIS = [-4 4 -4 4]
 
 
 %% generate data
@@ -32,7 +33,7 @@ axis(AXIS)
 % filt = R'*diag([1 0.5])*R
 
 filt = diag([1 0.5])
-
+mu_filtered = [1.5, 1]
 
 
 X_filtered = X*filt'
@@ -41,7 +42,7 @@ X_filtered = X*filt'
 Cov_filtered = X_filtered'*X_filtered / N1
 
 subplot(222)
-plot(X_filtered(:,1), X_filtered(:,2), 'or')
+plot(mu_filtered(1)+X_filtered(:,1), mu_filtered(2)+X_filtered(:,2), 'or')
 box off
 
 hold on; plot_ellipse([0 0], Cov_filtered, 'r')
@@ -63,15 +64,20 @@ figure(2)
 clf; hold on
 %plot(X_mix(:,1), X_mix(:,2), 'og')
 plot(X(:,1), X(:,2), '+b')
-plot(X_filtered(:,1), X_filtered(:,2), 'or')
+%plot(X_filtered(:,1), X_filtered(:,2), 'or')
+plot(mu_filtered(1)+X_filtered(:,1), mu_filtered(2)+X_filtered(:,2), 'or')
 box off
 
+
+plot([0 mu_filtered(1)], [0 mu_filtered(2)], 'k-', 'LineWidth', 3)
+text(mu_filtered(1)/2-0.1, mu_filtered(2)/2+0.2, 'STA', 'FontSize',20,  'HorizontalAlignment','right')
+
 plot_ellipse([0 0], Cov, 'b--')
-plot_ellipse([0 0], Cov_filtered, 'r--')
+plot_ellipse(mu_filtered, Cov_filtered, 'r--')
 
 axis(AXIS)
-xlabel('X_1')
-ylabel('X_2')
+xlabel('PC_1')
+ylabel('PC_2')
 
 
 set(gcf, 'paperposition', [0 0 12 10])
