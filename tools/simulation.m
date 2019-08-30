@@ -45,7 +45,7 @@ subplot(222)
 plot(mu_filtered(1)+X_filtered(:,1), mu_filtered(2)+X_filtered(:,2), 'or')
 box off
 
-hold on; plot_ellipse([0 0], Cov_filtered, 'r')
+hold on; plot_ellipse(mu_filtered, Cov_filtered, 'r')
 
 
 axis(AXIS)
