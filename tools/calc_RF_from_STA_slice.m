@@ -1,4 +1,4 @@
-function [pos_RFs, neg_RFs, strongest_RF] = calc_RF_from_STA_slice(STA, T, width, height, fps, FLIP_XY)
+function [pos_RFs, neg_RFs, strongest_RF, peak_center] = calc_RF_from_STA_slice(STA, T, width, height, fps, FLIP_XY)
 
 
 
@@ -26,10 +26,20 @@ gridT = (-T+1:0)/fps;
 % decide cell type according to the strength of the signal
 if (max_val-0.5) > (0.5 - min_val)
     cell_type = 1;  %'ON'
+    % find peak center
+    sta_slice = STA(max_slice_idx,:);
+    [~, maxIdx] = max(sta_slice);
+    peak_center = [max_slice_idx, mod(maxIdx, width), floor((maxIdx-1)/width)+1];
 else
     cell_type = 0;  %'OFF'
+    % find peak center
+    sta_slice = STA(min_slice_idx,:);
+    [~, minIdx] = min(sta_slice);
+    peak_center = [min_slice_idx, mod(minIdx, width), floor((minIdx-1)/width)+1];
 end
     
+
+
 
 
 
