@@ -142,6 +142,16 @@ for t=1:T
     
     %% Store largest mean and cov of largest RF
     
+    
+    %% if fails
+    if ~isfield(strongest_RF, 'type')
+        if cell_type == 1
+            strongest_RF.type = 'ON';
+        else
+            strongest_RF.type = 'OFF';
+        end
+    end
+    
 end
 
 colormap gray

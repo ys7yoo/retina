@@ -520,34 +520,101 @@ channels_with_significant_eigen_values = channel_names(num_significant_evs>0)
 save channels_with_significant_eigen_values channels_with_significant_eigen_values
 
 
-%% plot STC results on the mosaic
+%% plot STA  and STC results on the mosaic
 
-% plot STA mosaic
 clf; 
-subplot(121)
-hold on
+
 for n=channel_index_to_analyze
-    plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+    channel_names{n}
+    stc_significant_idx = stc_significant_ev_idx{n}
+    
+    if ~isfield(RFs{n}, 'type')
+        warning(sprintf('skip channel %s', channel_names{n}))
+        continue
+    end
+        
+    % plot RF from STA
+    if  strcmp(RFs{n}.type,'ON') % ON cell
+        subplot(221); hold on 
+        plot_RF(RFs{n}, FLIP_XY)
+        STC_SUBPLOT=223;
+    else %strcmp(RFs{n}.type,'OFF') % OFF cell        
+        subplot(222); hold on
+        plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+        STC_SUBPLOT=224;
+    end
+    
+    % plot STC eig signs
+    subplot(STC_SUBPLOT); hold on
+
+    if isfield(RFs{n}, 'mean')
+        center = RFs{n}.mean;
+    else
+        center = RFs{n}.peak_center(2:3);
+    end
+        
+    if ~isempty(stc_significant_idx)
+        for idx = stc_significant_idx
+            if idx < (size(u,1)/2)   % larger
+                tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','left');
+                tt.Color = [1 0 0];                
+                disp('larger ev')
+            else   % smaller
+                tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','right');
+                tt.Color = [0 0 1];
+                disp('smaller ev')
+            end
+        end
+    else
+        tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','center');
+        tt.Color = [0 0 0];
+        disp('no significant ev')
+    end
 end
+
+% STA info
+subplot(221)
 xlabel('x')
 ylabel('y')
-title('receptive field mosaic')
-axis xy
-% axis ([1 width+2  2 height+4])
+title('receptive field from STA (ON cell)')
 
-%plot_MEA(offset_X, offset_Y)
 plot_MEA_param(ab, cd);
+axis xy
+%axis ([1 width  1 height])
+
+subplot(222)
+xlabel('x')
+ylabel('y')
+title('receptive field from STA (OFF cell)')
+
+plot_MEA_param(ab, cd);
+axis xy
+%axis ([1 width  1 height])
 
 
-subplot(122) % to plot STC results 
+% STC info
+subplot(223) 
+axis xy
+plot_MEA_param(ab, cd);
+%axis ([1 width  1 height])
 
 
-% set(gcf, 'paperposition', [0 0 24 20])
-% set(gcf, 'papersize', [24 20])
+title('STC with larger(red)/smaller(blue) eig. val. (ON cell)')
 
-%     saveas(gcf, sprintf('mosaic.png'))
-%     saveas(gcf, sprintf('mosaic.pdf'))
-%     
+subplot(224) 
+axis xy
+plot_MEA_param(ab, cd);
+%axis ([1 width  1 height])
+
+title('STC with larger(red)/smaller(blue) eig. val. (OFF cell)')
+
+
+set(gcf, 'paperposition', [0 0 10 8])
+set(gcf, 'papersize', [10 8])
+
+saveas(gcf, sprintf('mosaic_STA_STC.png'))
+saveas(gcf, sprintf('mosaic_STA_STC.pdf'))
+    
 return 
 
 
