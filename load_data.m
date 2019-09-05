@@ -4,6 +4,9 @@ function [stim, spike_train, channel_names, exp_param] = load_data(base_folder_n
 find_stim_info_filename = dir(fullfile(base_folder_name,'Stiminfo*'));
 
 num_stim_info_files=length(find_stim_info_filename);
+if num_stim_info_files == 0
+    error(sprintf('cannot find stim_info file from %s', base_folder_name))
+end
 if num_stim_info_files>1
     % there may be multiple files!
     disp('There are multiple files in the folder.')
