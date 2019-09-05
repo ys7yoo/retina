@@ -9,8 +9,10 @@ addpath tools
 clear
 
 % unified loaindg routine
-base_folder_name = 'data/20180618'
-%base_folder_name = 'data/20180905_26x26'
+%base_folder_name = 'data/20180618'
+base_folder_name = 'data/20180621'
+%base_folder_name = 'data/20180626'
+%base_folder_name = 'data/20180905' # 26x26
 %base_folder_name = 'data/20180828_ReceptiveField_TemporalFilter'
 
 [stim, spike_train, channel_names, exp_param] = load_data(base_folder_name);
@@ -59,6 +61,9 @@ toc
 % decide which channels to analyze further
 
 sta_app
+
+%% analyze all ch
+channel_index_to_analyze = 1:length(channel_names)
 
 %% choose channels to analyze
 selected_channel_names = {'45a'}
@@ -232,6 +237,7 @@ end
 clear sta_ROI
 clear stc_RF
 num_significant_evs = [];
+clear idx_significant_ev_channels
 close all
 
 shift_min = sta_num_samples*10;
@@ -305,6 +311,11 @@ for n = channel_index_to_analyze
     if ~isempty(idx_significant_ev)
         idx_significant_ev
     end
+    
+    %% SAVE STC RESULTS FOR CHANNELS (TO ADD MORE)
+    
+    % save significant idxs for each channel    
+    idx_significant_ev_channels{n} = idx_significant_ev;
     
     %% plot results for this channel
     %close all
@@ -462,11 +473,17 @@ end
 
 %% plot numbers of significant eivenvalues
 figure
-bar(num_significant_evs); xlabel('channel index'); ylabel('number of significant eigen values'); box off
+bar(num_significant_evs);   box off
 
 title(sprintf('Sigificant eigen values found in %d channels.', sum(num_significant_evs>0)))
 
 set(gca,'ytick',[0 1 2 3])
+ylabel('number of significant eigen values');
+
+set(gca,'xtick', channel_index_to_analyze)
+% xlabel('channel index');
+set(gca, 'xticklabel', get_channel_names(channel_names, channel_index_to_analyze))
+xlabel('channel names')
 
 set(gcf, 'paperposition', [0 0 12 7])
 set(gcf, 'papersize', [12 7])
@@ -481,4 +498,34 @@ channels_with_significant_eigen_values = channel_names(num_significant_evs>0)
 save channels_with_significant_eigen_values channels_with_significant_eigen_values
 
 
+%% plot STC results on the mosaic
+
+% plot STA mosaic
+clf; 
+subplot(121)
+hold on
+for n=channel_index_to_analyze
+    plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+end
+xlabel('x')
+ylabel('y')
+title('receptive field mosaic')
+axis xy
+axis ([1 width+2  2 height+4])
+
+%plot_MEA(offset_X, offset_Y)
+plot_MEA_param(ab, cd);
+
+
+subplot(122) % to plot STC results 
+
+
+% set(gcf, 'paperposition', [0 0 24 20])
+% set(gcf, 'papersize', [24 20])
+
+%     saveas(gcf, sprintf('mosaic.png'))
+%     saveas(gcf, sprintf('mosaic.pdf'))
+%     
 return 
+
+
