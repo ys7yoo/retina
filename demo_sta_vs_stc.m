@@ -498,10 +498,8 @@ channels_with_significant_eigen_values = channel_names(num_significant_evs>0)
 save channels_with_significant_eigen_values channels_with_significant_eigen_values
 
 
-%% plot channels with significant eig values on the mosaic
+%% plot STC results on the mosaic
 
-
-%% plot mosaic
 % plot STA mosaic
 clf; 
 subplot(121)
