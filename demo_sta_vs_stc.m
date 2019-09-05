@@ -511,7 +511,7 @@ xlabel('x')
 ylabel('y')
 title('receptive field mosaic')
 axis xy
-axis ([1 width+2  2 height+4])
+%axis ([1 width+2  2 height+4])
 
 %plot_MEA(offset_X, offset_Y)
 plot_MEA_param(ab, cd);
