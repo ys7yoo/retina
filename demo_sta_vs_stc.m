@@ -66,11 +66,11 @@ sta_app
 channel_index_to_analyze = 1:length(channel_names)
 
 %% choose channels to analyze
-selected_channel_names = {'45a'}
-%selected_channel_names = {'41a', '54e', '72a'}
-%selected_channel_names = {'13c', '37c', '58b', '75d', '77d', '16b', '26a', '27a', '37b', '47b'}
-
-channel_index_to_analyze = calc_channel_index(channel_names, selected_channel_names)
+% selected_channel_names = {'45a'}
+% %selected_channel_names = {'41a', '54e', '72a'}
+% %selected_channel_names = {'13c', '37c', '58b', '75d', '77d', '16b', '26a', '27a', '37b', '47b'}
+% 
+% channel_index_to_analyze = calc_channel_index(channel_names, selected_channel_names)
 
 
 %% fit elliptical RFs to STA results (2019. 1. 27)
@@ -101,13 +101,14 @@ for n = channel_index_to_analyze
     
     %%
     clf
-    
-    
     [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_all_channels{n}, sta_num_samples, width, height, sampling_rate, FLIP_XY);
     strongest_RF.channel_name = channel_names{n};
     set(gcf, 'paperposition', [0 0 24 9])
     set(gcf, 'papersize', [24 9])
 
+    subplot(2,5, strongest_RF.peak_center(1));
+    plot(strongest_RF.peak_center(3), strongest_RF.peak_center(2), '+c')
+    
     saveas(gcf, sprintf('RF_from_STA_slice_%s.png',channel_names{n}))
     saveas(gcf, sprintf('RF_from_STA_slice_%s.pdf',channel_names{n}))
     
@@ -237,7 +238,9 @@ end
 clear sta_ROI
 clear stc_RF
 num_significant_evs = [];
-clear idx_significant_ev_channels
+clear stc_ev
+clear stc_u
+clear stc_significant_ev_idx
 close all
 
 shift_min = sta_num_samples*10;
@@ -257,13 +260,17 @@ mask_name = '3x3';
 
 for n = channel_index_to_analyze
 
-    if ~isfield(RFs{n},'mean')
-        continue;
-    end
+%     if ~isfield(RFs{n},'mean')
+%         continue;
+%     end
+
+    %% choose center 
+    center = RFs{n}.peak_center(2:3);
+    % center = RFs{n}.mean;
     
     %% set up ROI mask
     if USE_ROI_MASK
-        [mask, XX, YY] = generate_ROI_mask_neighbors(width, height, RFs{n}.mean, roi_radius);
+        [mask, XX, YY] = generate_ROI_mask_neighbors(width, height, center, roi_radius);
     end
 
     % Alternative ways to set ROI mask
@@ -290,13 +297,13 @@ for n = channel_index_to_analyze
     
     u = u(:,1:num_non_zero_eig_val);
     
-    %% re-fit ellipse to sta_ROI
-    [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_ROI{n}+0.5, sta_num_samples, max(XX(mask>0))-min(XX(mask>0))+1, max(YY(mask>0))-min(YY(mask>0))+1, sampling_rate, FLIP_XY);
-
-    if ~isempty(strongest_RF)
-        ROI_xy = [min(XX(mask>0))-1 min(YY(mask>0))-1];
-        strongest_RF.mean = strongest_RF.mean + ROI_xy;
-    end
+%     %% re-fit ellipse to sta_ROI
+%     [pos_RF, neg_RF, strongest_RF] = calc_RF_from_STA_slice(sta_ROI{n}+0.5, sta_num_samples, max(XX(mask>0))-min(XX(mask>0))+1, max(YY(mask>0))-min(YY(mask>0))+1, sampling_rate, FLIP_XY);
+% 
+%     if ~isempty(strongest_RF)
+%         ROI_xy = [min(XX(mask>0))-1 min(YY(mask>0))-1];
+%         strongest_RF.mean = strongest_RF.mean + ROI_xy;
+%     end
             
 
     %% identify significant eigen values using bootstraping with nested hypothesis
@@ -312,10 +319,10 @@ for n = channel_index_to_analyze
         idx_significant_ev
     end
     
-    %% SAVE STC RESULTS FOR CHANNELS (TO ADD MORE)
-    
-    % save significant idxs for each channel    
-    idx_significant_ev_channels{n} = idx_significant_ev;
+    %% SAVE STC RESULTS FOR ALL THE CHANNELS
+    stc_ev{n} = ev;
+    stc_u{n} = u;
+    stc_significant_ev_idx{n} = idx_significant_ev;
     
     %% plot results for this channel
     %close all
@@ -470,12 +477,27 @@ for n = channel_index_to_analyze
 end
 
 
+%% Save STC Results
+save STC.mat stc_u stc_ev stc_significant_ev_idx
+
+%% plot evs in one plot
+clf; 
+subplot(121)
+hold on
+for n=1:length(stc_ev)
+    plot(stc_ev{n})
+end
+legend (get_channel_names(channel_names, num_significant_evs>0))
+
+subplot(121)
+
+
 
 %% plot numbers of significant eivenvalues
 figure
 bar(num_significant_evs);   box off
 
-title(sprintf('Sigificant eigen values found in %d channels.', sum(num_significant_evs>0)))
+title(sprintf('Sigificant eigen values found in %d cells.', sum(num_significant_evs>0)))
 
 set(gca,'ytick',[0 1 2 3])
 ylabel('number of significant eigen values');
@@ -498,34 +520,101 @@ channels_with_significant_eigen_values = channel_names(num_significant_evs>0)
 save channels_with_significant_eigen_values channels_with_significant_eigen_values
 
 
-%% plot STC results on the mosaic
+%% plot STA  and STC results on the mosaic
 
-% plot STA mosaic
 clf; 
-subplot(121)
-hold on
+
 for n=channel_index_to_analyze
-    plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+    channel_names{n}
+    stc_significant_idx = stc_significant_ev_idx{n}
+    
+    if ~isfield(RFs{n}, 'type')
+        warning(sprintf('skip channel %s', channel_names{n}))
+        continue
+    end
+        
+    % plot RF from STA
+    if  strcmp(RFs{n}.type,'ON') % ON cell
+        subplot(221); hold on 
+        plot_RF(RFs{n}, FLIP_XY)
+        STC_SUBPLOT=223;
+    else %strcmp(RFs{n}.type,'OFF') % OFF cell        
+        subplot(222); hold on
+        plot_RF(RFs{n}, FLIP_XY)  % drawing codes are moved to this function
+        STC_SUBPLOT=224;
+    end
+    
+    % plot STC eig signs
+    subplot(STC_SUBPLOT); hold on
+
+    if isfield(RFs{n}, 'mean')
+        center = RFs{n}.mean;
+    else
+        center = RFs{n}.peak_center(2:3);
+    end
+        
+    if ~isempty(stc_significant_idx)
+        for idx = stc_significant_idx
+            if idx < (size(u,1)/2)   % larger
+                tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','left');
+                tt.Color = [1 0 0];                
+                disp('larger ev')
+            else   % smaller
+                tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','right');
+                tt.Color = [0 0 1];
+                disp('smaller ev')
+            end
+        end
+    else
+        tt=text(center(2), center(1), channel_names{n}(4:end), 'HorizontalAlignment','center');
+        tt.Color = [0 0 0];
+        disp('no significant ev')
+    end
 end
+
+% STA info
+subplot(221)
 xlabel('x')
 ylabel('y')
-title('receptive field mosaic')
-axis xy
-axis ([1 width+2  2 height+4])
+title('receptive field from STA (ON cell)')
 
-%plot_MEA(offset_X, offset_Y)
 plot_MEA_param(ab, cd);
+axis xy
+%axis ([1 width  1 height])
+
+subplot(222)
+xlabel('x')
+ylabel('y')
+title('receptive field from STA (OFF cell)')
+
+plot_MEA_param(ab, cd);
+axis xy
+%axis ([1 width  1 height])
 
 
-subplot(122) % to plot STC results 
+% STC info
+subplot(223) 
+axis xy
+plot_MEA_param(ab, cd);
+%axis ([1 width  1 height])
 
 
-% set(gcf, 'paperposition', [0 0 24 20])
-% set(gcf, 'papersize', [24 20])
+title('STC with larger(red)/smaller(blue) eig. val. (ON cell)')
 
-%     saveas(gcf, sprintf('mosaic.png'))
-%     saveas(gcf, sprintf('mosaic.pdf'))
-%     
+subplot(224) 
+axis xy
+plot_MEA_param(ab, cd);
+%axis ([1 width  1 height])
+
+title('STC with larger(red)/smaller(blue) eig. val. (OFF cell)')
+
+
+set(gcf, 'paperposition', [0 0 10 8])
+set(gcf, 'papersize', [10 8])
+
+saveas(gcf, sprintf('mosaic_STA_STC.png'))
+saveas(gcf, sprintf('mosaic_STA_STC.pdf'))
+    
 return 
 
 

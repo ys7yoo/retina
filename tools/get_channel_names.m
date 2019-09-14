@@ -1,5 +1,8 @@
 function selected_channel_names = get_channel_names(channel_names, index)
 
+if nargin< 2
+    index = 1:length(channel_names);
+end
 
 selected_channel_names = {channel_names{index}};
 %return {channel_names{index}}

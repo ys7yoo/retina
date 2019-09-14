@@ -26,10 +26,20 @@ gridT = (-T+1:0)/fps;
 % decide cell type according to the strength of the signal
 if (max_val-0.5) > (0.5 - min_val)
     cell_type = 1;  %'ON'
+    % find peak center
+    sta_slice = STA(max_slice_idx,:);
+    [~, maxIdx] = max(sta_slice);
+    peak_center = [max_slice_idx, floor((maxIdx-1)/height)+1, mod(maxIdx, height)];
 else
     cell_type = 0;  %'OFF'
+    % find peak center
+    sta_slice = STA(min_slice_idx,:);
+    [~, minIdx] = min(sta_slice);
+    peak_center = [min_slice_idx, floor((minIdx-1)/height)+1, mod(minIdx, height)];
 end
     
+
+
 
 
 
@@ -132,12 +142,23 @@ for t=1:T
     
     %% Store largest mean and cov of largest RF
     
+    
+    %% if fails
+    if ~isfield(strongest_RF, 'type')
+        if cell_type == 1
+            strongest_RF.type = 'ON';
+        else
+            strongest_RF.type = 'OFF';
+        end
+    end
+    
 end
 
 colormap gray
 
 
 
+strongest_RF.peak_center = peak_center;
 
 
 
