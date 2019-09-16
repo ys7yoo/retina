@@ -1,4 +1,4 @@
-function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(stim, spike_train, n, project_out_sta)
+function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(stim, spike_train, n, project_out_sta, channel_name)
 
 % input:
 %       Stim = (time) x (space)
@@ -10,8 +10,18 @@ if nargin<4
     project_out_sta = true;
 end
 
+if nargin<5
+    channel_name = [];
+end
+
 %% store spike-tiggered stims in to X with spike numbers in spikes
 [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim, spike_train, n);
+
+% save here for further analysis
+if ~isempty(channel_name)
+    %save ch33b.mat X spikes num_total_spikes
+    save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
+end
 
 %% calc STA
 sta = spikes'*X/num_total_spikes;
@@ -50,9 +60,6 @@ end
         
 
 return 
-
-
-
 
 
 
