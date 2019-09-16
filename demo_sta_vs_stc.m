@@ -189,13 +189,24 @@ if length(channel_index_to_analyze) > 1
 
         xy = calc_MEA_location_from_channel_name(channel_names{n}, ab, cd);
 
+        if isfield(RFs{n}, 'mean')
+            center = RFs{n}.mean-xy;
+            
+            %plot(xy(2), xy(1), 'o')
+            %plot_ellipse(RFs{n}.mean, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+            %plot_ellipse(xy, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+            plot_ellipse(center, RFs{n}.cov, LINE_STYLE, FLIP_XY);
 
-        center = RFs{n}.mean-xy;
-
-        %plot(xy(2), xy(1), 'o')
-        %plot_ellipse(RFs{n}.mean, RFs{n}.cov, LINE_STYLE, FLIP_XY);
-        %plot_ellipse(xy, RFs{n}.cov, LINE_STYLE, FLIP_XY);
-        plot_ellipse(center, RFs{n}.cov, LINE_STYLE, FLIP_XY);
+        else
+            center = RFs{n}.peak_center(2:3)-xy;
+            
+            if FLIP_XY
+                plot(center(2), center(1), '+g');
+            else
+                plot(center(1), center(2), '+g');
+            end
+            
+        end
 
         % put names 
         text(center(2),center(1), channel_names{n}(4:end), 'HorizontalAlignment','center')
