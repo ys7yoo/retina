@@ -400,6 +400,7 @@ for n = channel_index_to_analyze
             xlabel('score')
             %xlabel(sprintf('score onto the STC filter %d',ii))
             ylabel('count')
+            title(sprintf('histogram of scores (var=%.3f, eig val=%.3f)', var(score(:,ii)),ev(ii)))
             box off
             
             %%
