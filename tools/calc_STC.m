@@ -33,3 +33,7 @@ switch nargout
 
         %stc_eig_vec = flip_column_sign(stc_eig_vec, sta-0.5);  % flip according to sta (for better visualization)
 end
+
+%% normalize eig values 
+stc_eig_val = stc_eig_val / (sum(spikes)-1);
+
