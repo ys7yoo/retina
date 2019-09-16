@@ -10,8 +10,8 @@ clear
 
 % unified loaindg routine
 %base_folder_name = 'data/20180618'
-base_folder_name = 'data/20180621'
-%base_folder_name = 'data/20180626'
+%base_folder_name = 'data/20180621'
+base_folder_name = 'data/20180626'
 %base_folder_name = 'data/20180905' # 26x26
 %base_folder_name = 'data/20180828_ReceptiveField_TemporalFilter'
 
