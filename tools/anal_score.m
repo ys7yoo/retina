@@ -39,7 +39,8 @@ sc1 = scatter(score(:,1), score(:,2), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-cov12 = cov(score(:,1), score(:,2))
+cov12 = score(:,1:2)'*score(:,1:2)/size(score,1)
+%cov12 = cov(score(:,1), score(:,2))
 plot_ellipse([0 0], cov12)
 
 xlabel('ev1')
@@ -53,7 +54,8 @@ sc1 = scatter(score(:,end), score(:,end-1), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-cov_small = cov(score(:,end), score(:,end-1))
+%cov_small = cov(score(:,end), score(:,end-1))
+cov_small = score(:,end:-1:end-1)'*score(:,end:-1:end-1)/size(score,1)
 plot_ellipse([0 0], cov_small)
 
 xlabel(sprintf('ev%d',length(stc_eig_val)))
