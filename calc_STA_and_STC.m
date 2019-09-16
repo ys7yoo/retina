@@ -1,4 +1,4 @@
-function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(stim, spike_train, n, project_out_sta, channel_name)
+function [sta, stc_eig_val, stc_eig_vec, stc, score] = calc_STA_and_STC(stim, spike_train, n, project_out_sta, channel_name)
 
 % input:
 %       Stim = (time) x (space)
@@ -48,10 +48,14 @@ if nargout>1
             
             stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)
             
-        case 4 % full algorithm with covariance
-            [stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes);
+        case {4, 5} % full algorithm with covariance
+            [stc_eig_val, stc_eig_vec, stc] = calc_STC(X, spikes);
                         
             stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)            
+    end
+    
+    if nargout > 4 % calc score
+        score = X*stc_eig_vec;
     end
     
     % save here for further analysis

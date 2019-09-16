@@ -301,7 +301,7 @@ for n = channel_index_to_analyze
     
     %% STC analysis
     % cleaned up code 
-    [sta_ROI{n}, ev, u] = calc_STA_and_STC(stim_chosen(1:end-shift_max,:), spike_train_chosen(1:end-shift_max), sta_num_samples, true, channel_names{n});
+    [sta_ROI{n}, ev, u, ~, score] = calc_STA_and_STC(stim_chosen(1:end-shift_max,:), spike_train_chosen(1:end-shift_max), sta_num_samples, true, channel_names{n});
     
     ev = ev(ev>1e-5);
     num_non_zero_eig_val = length(ev);
@@ -323,7 +323,9 @@ for n = channel_index_to_analyze
     num_repeat=50;
     idx_significant_ev = find_significant_eigen_values(ev, u, stim_chosen, spike_train_chosen, sta_num_samples, num_repeat, [shift_min shift_max], sta_ROI{n});   
     toc
-            
+    
+    idx_significant_ev = sort(idx_significant_ev);
+    
     num_significant_evs(n) = length(idx_significant_ev);
     disp(sprintf('%d significant igenvalues found',num_significant_evs(n)))
     if ~isempty(idx_significant_ev)
@@ -334,6 +336,7 @@ for n = channel_index_to_analyze
     stc_ev{n} = ev;
     stc_u{n} = u;
     stc_significant_ev_idx{n} = idx_significant_ev;
+    stc_score{n} = score;
     
     %% plot results for this channel
     %close all
@@ -342,7 +345,8 @@ for n = channel_index_to_analyze
     if num_significant_evs(n) == 0 
         r=2;
     else
-        r=1+ceil(num_significant_evs(n)/2);
+        %r=1+ceil(num_significant_evs(n)/2);
+        r=1+num_significant_evs(n);
     end
     c=2;
     clf
@@ -380,7 +384,7 @@ for n = channel_index_to_analyze
                     
             %%
             figure(1)
-            subplot(r,c,2+i)
+            subplot(r,c,i*2+1)
             us = reshape(u(:,ii),sta_num_samples,[]);
             plot(gridT,us)
 
@@ -388,7 +392,15 @@ for n = channel_index_to_analyze
             ylabel(sprintf('STC filter %d',ii))
             xlabel('time to spike (s)')
             box off
+            
+            % plot histogram of score!
+            subplot(r,c,i*2+2)
+            hist(score(:,ii))
 
+            xlabel('score')
+            %xlabel(sprintf('score onto the STC filter %d',ii))
+            ylabel('count')
+            box off
             
             %%
             figure(2)   % plot spatial pattern in a separate figure
