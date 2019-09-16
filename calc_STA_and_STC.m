@@ -17,11 +17,7 @@ end
 %% store spike-tiggered stims in to X with spike numbers in spikes
 [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim, spike_train, n);
 
-% save here for further analysis
-if ~isempty(channel_name)
-    %save ch33b.mat X spikes num_total_spikes
-    save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
-end
+
 
 %% calc STA
 sta = spikes'*X/num_total_spikes;
@@ -36,7 +32,14 @@ if nargout>1
     % 2) project out sta, if requested
     if project_out_sta
         X = project_out_components(X, sta);
+    end    
+    
+    % save here for further analysis
+    if ~isempty(channel_name)
+        %save ch33b.mat X spikes num_total_spikes
+        save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
     end
+    
        
     %% calc STC
     switch nargout 
