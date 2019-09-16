@@ -301,7 +301,7 @@ for n = channel_index_to_analyze
     
     %% STC analysis
     % cleaned up code 
-    [sta_ROI{n}, ev, u] = calc_STA_and_STC(stim_chosen(1:end-shift_max,:), spike_train_chosen(1:end-shift_max), sta_num_samples);
+    [sta_ROI{n}, ev, u] = calc_STA_and_STC(stim_chosen(1:end-shift_max,:), spike_train_chosen(1:end-shift_max), sta_num_samples, true, channel_names{n});
     
     ev = ev(ev>1e-5);
     num_non_zero_eig_val = length(ev);

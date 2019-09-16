@@ -1,4 +1,4 @@
-function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(stim, spike_train, n, project_out_sta)
+function [sta, stc_eig_val, stc_eig_vec, S] = calc_STA_and_STC(stim, spike_train, n, project_out_sta, channel_name)
 
 % input:
 %       Stim = (time) x (space)
@@ -10,11 +10,18 @@ if nargin<4
     project_out_sta = true;
 end
 
+if nargin<5
+    channel_name = [];
+end
+
 %% store spike-tiggered stims in to X with spike numbers in spikes
 [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim, spike_train, n);
 
 % save here for further analysis
-%save ch33b.mat X spikes num_total_spikes
+if ~isempty(channel_name)
+    %save ch33b.mat X spikes num_total_spikes
+    save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
+end
 
 %% calc STA
 sta = spikes'*X/num_total_spikes;
@@ -59,7 +66,9 @@ return
 % data saved by the following command: save ch33b.mat X spikes num_total_spikes
 
 clear
-load ch33b.mat
+channel_name = 'ch_42b'
+%load ch_42b.mat
+load(channel_name)
 
 % calc STA
 sta = spikes'*X/num_total_spikes;
@@ -74,15 +83,19 @@ clf
 subplot(221)
 plot(stc_eig_val, 'o--')
 box off
+xlabel('index')
+ylabel('eigen value')
 
 subplot(222)
 hist(stc_eig_val)
+%hist(sqrt(stc_eig_val))
 box off
+xlabel('eigen value')
+ylabel('count')
 
-
-% calc scores for first r dimension
+% calc scores for each dim
 r = 2
-score = X*stc_eig_vec(:,1:r)
+score = X*stc_eig_vec;
 
 subplot(223)
 sc1 = scatter(score(:,1), score(:,2), '.'); %, '.', 'alpha', 0.2)
@@ -103,13 +116,17 @@ sc1 = scatter(score(:,end), score(:,end-1), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-plot_ellipse([0 0], cov(score(:,end), score(:,end-1)))
+cov_small = cov(score(:,end), score(:,end-1))
+plot_ellipse([0 0], cov_small)
 
 xlabel(sprintf('ev%d',length(stc_eig_val)))
 ylabel(sprintf('ev%d',length(stc_eig_val)-1))
 axis equal
 axis ([-2.5 2.5 -2 2])
 
+
+% saveas(gcf, sprintf('%s_score.pdf', channel_name))
+saveas(gcf, sprintf('%s_score.png', channel_name))
 
 %% to debug
 
