@@ -354,7 +354,7 @@ for n = channel_index_to_analyze
     title(sprintf('%s',channel_names{n}),'Interpreter', 'none')
 
     subplot(r,c,2)
-    plot(ev)
+    plot(ev, 'o:', 'markersize', 5)
     hold on
 %     plot(ev_upper, 'r--')
 %     plot(ev_lower, 'r--')
