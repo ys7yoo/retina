@@ -31,7 +31,6 @@ ylabel('count')
 title('histogram of eigen values')
 
 % calc scores for each dim
-r = 2
 score = X*stc_eig_vec;
 
 subplot(223)
@@ -40,7 +39,6 @@ sc1.MarkerEdgeAlpha=0.4;
 
 hold on
 cov12 = score(:,1:2)'*score(:,1:2)/(size(score,1)-1)
-%cov12 = cov(score(:,1), score(:,2))
 plot_ellipse([0 0], cov12)
 
 xlabel('ev1')
@@ -50,16 +48,16 @@ axis equal
 axis ([-2.5 2.5 -2 2])
 
 subplot(224)
-sc1 = scatter(score(:,end), score(:,end-1), '.'); %, '.', 'alpha', 0.2)
+r = length(find(stc_eig_val>1e-15));
+sc1 = scatter(score(:,r), score(:,r-1), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-%cov_small = cov(score(:,end), score(:,end-1))
-cov_small = score(:,end:-1:end-1)'*score(:,end:-1:end-1)/(size(score,1)-1)
+cov_small = score(:,r:-1:r-1)'*score(:,r:-1:r-1)/(size(score,1)-1)
 plot_ellipse([0 0], cov_small)
 
-xlabel(sprintf('ev%d',length(stc_eig_val)))
-ylabel(sprintf('ev%d',length(stc_eig_val)-1))
+xlabel(sprintf('ev%d',r))
+ylabel(sprintf('ev%d',r-1))
 axis equal
 axis ([-2.5 2.5 -2 2])
 

@@ -34,11 +34,7 @@ if nargout>1
         X = project_out_components(X, sta);
     end    
     
-    % save here for further analysis
-    if ~isempty(channel_name)
-        %save ch33b.mat X spikes num_total_spikes
-        save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
-    end
+    
     
        
     %% calc STC
@@ -55,9 +51,19 @@ if nargout>1
         case 4 % full algorithm with covariance
             [stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes);
                         
-            stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)
+            stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)            
+    end
+    
+    % save here for further analysis
+    if ~isempty(channel_name)
+        if exist('stc_eig_vec', 'var')
+            save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes', 'stc_eig_val', 'stc_eig_vec')
+        else
+            save(sprintf('%s.mat',channel_name), 'X', 'spikes', 'num_total_spikes', 'stc_eig_val')
+        end
             
     end
+    
 
 end
         
