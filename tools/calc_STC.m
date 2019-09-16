@@ -1,6 +1,7 @@
 function [stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes)
 
 
+num_total_spikes = sum(spikes);
 %% calc STC
 switch nargout 
     case 1   % STA and STC eigen value only (COVARIANCE NOT NEEDED)
@@ -29,11 +30,14 @@ switch nargout
 
         [stc_eig_vec, d, ~] = svd(S);
 
-        stc_eig_val = diag(d);            
+        stc_eig_val = diag(d);
+        
+        % devide S here
+        S = S / (num_total_spikes-1);
 
         %stc_eig_vec = flip_column_sign(stc_eig_vec, sta-0.5);  % flip according to sta (for better visualization)
 end
 
 %% normalize eig values 
-stc_eig_val = stc_eig_val / (sum(spikes)-1);
+stc_eig_val = stc_eig_val / (num_total_spikes-1);
 
