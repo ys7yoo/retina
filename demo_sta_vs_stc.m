@@ -358,18 +358,18 @@ for n = channel_index_to_analyze
     title(sprintf('%s',channel_names{n}),'Interpreter', 'none')
 
     subplot(r,c,2)
-    plot(ev, 'o:', 'markersize', 5)
+    plot(ev, 'ko:', 'markersize', 5)
     hold on
 %     plot(ev_upper, 'r--')
 %     plot(ev_lower, 'r--')
-    set(gca,'yscale','log')
+%     set(gca,'yscale','log')
     axis tight
     
 %     XLIM=get(gca,'xlim');
 %     plot(XLIM, ev_range(1)*[1 1], 'r--')
 %     plot(XLIM, ev_range(2)*[1 1], 'r--')
 
-    plot(idx_significant_ev, ev(idx_significant_ev), '*k')
+    plot(idx_significant_ev, ev(idx_significant_ev), '*r')
     ylabel('eigen values of STC')
     box off
     %axis tight

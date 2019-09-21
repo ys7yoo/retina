@@ -10,14 +10,19 @@ load(channel_name)
 sta = spikes'*X/num_total_spikes;
 
 % calc STFC
-[stc_eig_val, stc_eig_vec, S] = calc_STC(X, spikes);
+[stc_eig_val, stc_eig_vec] = calc_STC(X, spikes);
                         
 stc_eig_vec = flip_column_sign(stc_eig_vec, sta);  % flip according to sta (for better visualization)
+
+%  select only non-zero eigen values
+r = length(find(stc_eig_val>1e-15));
+stc_eig_val = stc_eig_val(1:r);
+stc_eig_vec = stc_eig_vec(:,1:r);
 
 % plot eig val
 clf
 subplot(221)
-plot(stc_eig_val, 'o--')
+plot(stc_eig_val, 'o--', 'markersize', 5)
 box off
 xlabel('index')
 ylabel('eigen value')
@@ -48,7 +53,6 @@ axis equal
 axis ([-2.5 2.5 -2 2])
 
 subplot(224)
-r = length(find(stc_eig_val>1e-15));
 sc1 = scatter(score(:,r), score(:,r-1), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
