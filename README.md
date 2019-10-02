@@ -11,7 +11,7 @@
 ## Matlab App (GUI) added for easier analysis!
 * All the STA and STC results must be in the current workspace. 
 
-  For example, Right after run `demo_sta_vs_stc`, save results to a MAT file (about 100~200 MB).
+  For example, right after running `demo_sta_vs_stc`, save results to a MAT file (about 100~200 MB).
   ```
   save results_20190922.mat
   ```
