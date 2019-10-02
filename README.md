@@ -19,9 +19,9 @@ save results_20190922.mat
 addpath tools
 ```
 
-* launch the app by 
+* launch the app by typing 
 ```
-stc_all
+stc_app
 ```
 
 
