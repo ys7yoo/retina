@@ -8,7 +8,7 @@
 ## How to run STA and STC
 * See [`demo_sta_vs_stc.m`](demo_sta_vs_stc.m)
 
-## Matlab App (GUI) added!
+## Matlab App (GUI) added for easier analysis!
 * All the STA and STC results must be in the current workspace. 
 
   For example, Right after run `demo_sta_vs_stc`, save results to a MAT file (about 100~200 MB).
@@ -33,6 +33,12 @@
   stc_app
   ```
 
+* In the chennel list on the left, cleck the channel you want to anlyze.
+
+* Click 'STA' or 'STC' tap on the top
+
+![STA](doc/ch22b_STA.png)
+![STC](doc/ch22b_STC.png)
 
 
 ## [FUTURE WORK] To add GLM analysis
