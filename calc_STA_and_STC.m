@@ -17,7 +17,15 @@ end
 %% store spike-tiggered stims in to X with spike numbers in spikes
 [X, spikes, num_total_spikes] = collect_spike_triggered_stim(stim, spike_train, n);
 
-
+% save stim and spike for further analysis
+if ~isempty(channel_name)
+    if exist('stc_eig_vec', 'var')
+        save(sprintf('%s_stim_spike.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
+    else
+        save(sprintf('%s_stim_spike.mat',channel_name), 'X', 'spikes', 'num_total_spikes')
+    end
+end
+    
 
 %% calc STA
 sta = spikes'*X/num_total_spikes;
