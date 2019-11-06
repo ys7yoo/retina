@@ -38,12 +38,14 @@ title('histogram of eigen values')
 % calc scores for each dim
 score = X*stc_eig_vec;
 
+
+% plot in 2D plots
 subplot(223)
 sc1 = scatter(score(:,1), score(:,2), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-cov12 = score(:,1:2)'*score(:,1:2)/(size(score,1)-1)
+cov12 = score(:,1:2)'*score(:,1:2)/(size(score,1)-1);
 plot_ellipse([0 0], cov12)
 
 xlabel('ev1')
@@ -57,7 +59,7 @@ sc1 = scatter(score(:,r), score(:,r-1), '.'); %, '.', 'alpha', 0.2)
 sc1.MarkerEdgeAlpha=0.4;
 
 hold on
-cov_small = score(:,r:-1:r-1)'*score(:,r:-1:r-1)/(size(score,1)-1)
+cov_small = score(:,r:-1:r-1)'*score(:,r:-1:r-1)/(size(score,1)-1);
 plot_ellipse([0 0], cov_small)
 
 xlabel(sprintf('ev%d',r))
@@ -66,11 +68,87 @@ axis equal
 axis ([-2.5 2.5 -2 2])
 
 
-% saveas(gcf, sprintf('%s_score.pdf', channel_name))
+set(gcf, 'paperposition', [0 0 8 6])
+set(gcf, 'papersize', [8 6])
+
+saveas(gcf, sprintf('%s_score.pdf', channel_name))
 saveas(gcf, sprintf('%s_score.png', channel_name))
+
+%% 
+%% plot histogram of scores in separate figures
+
+% before plotting, determine figure params: figure size, common limits for x-axis
+FIGURE_W = 6;
+FIGURE_H = 4.5;
+
+XLIM_MAX = ceil(max(max(abs(score(:,[1 2 r-1 r])))));
+XLIM = XLIM_MAX * [-1 1];
+
+figure
+idx=1
+plot_score_histogram(score, idx, XLIM);
+set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
+set(gcf, 'papersize', [FIGURE_W FIGURE_H])
+saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
+saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
+
+figure
+idx = 2
+plot_score_histogram(score, idx, XLIM);
+set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
+set(gcf, 'papersize', [FIGURE_W FIGURE_H])
+saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
+saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
+
+figure
+idx = r-1
+plot_score_histogram(score, idx, XLIM);
+set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
+set(gcf, 'papersize', [FIGURE_W FIGURE_H])
+saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
+saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
+
+figure
+idx = r
+plot_score_histogram(score, r, XLIM);
+set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
+set(gcf, 'papersize', [FIGURE_W FIGURE_H])
+saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
+saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 
 return
+
+
+function XLIM = plot_score_histogram(score, idx, XLIM)
+
+hist(score(:,idx))
+title (sprintf('histogram of score %d',idx))
+xlabel (sprintf('score %d',idx))
+ylabel('count')
+box off
+
+% set XLIM, if needed
+if nargin>2
+    set(gca, 'xlim', XLIM);
+else
+    % set symmetric limits
+    XLIM = get(gca, 'xlim');
+    XLIM_MAX = max(XLIM);
+    set(gca, 'xlim', XLIM_MAX*[-1 1]);
+end
+
+% % return XLIM
+% XLIM = get(gca, 'xlim');
+
+
+return
+
+
+
+
+
+
 
 
 %% call for all the channels
