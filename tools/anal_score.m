@@ -1,4 +1,4 @@
-function anal_score(channel_name)
+function anal_score(channel_name, hist_num_bins)
 %% for detail analysis for each channel
 % data saved by the following command: save ch33b.mat X spikes num_total_spikes
 
@@ -84,9 +84,13 @@ FIGURE_H = 4.5;
 XLIM_MAX = ceil(max(max(abs(score(:,[1 2 r-1 r])))));
 XLIM = XLIM_MAX * [-1 1];
 
+if nargin<2
+    hist_num_bins = 30;      % default value
+end
+
 figure
 idx=1
-plot_score_histogram(score, idx, XLIM);
+plot_score_histogram(score, idx, XLIM, hist_num_bins);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -94,7 +98,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = 2
-plot_score_histogram(score, idx, XLIM);
+plot_score_histogram(score, idx, XLIM, hist_num_bins);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -102,7 +106,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = r-1
-plot_score_histogram(score, idx, XLIM);
+plot_score_histogram(score, idx, XLIM, hist_num_bins);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -110,7 +114,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = r
-plot_score_histogram(score, r, XLIM);
+plot_score_histogram(score, r, XLIM, hist_num_bins);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -120,9 +124,13 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 return
 
 
-function XLIM = plot_score_histogram(score, idx, XLIM)
+function XLIM = plot_score_histogram(score, idx, XLIM, num_bins)
 
-hist(score(:,idx))
+if nargin<4
+    hist(score(:,idx))
+else
+    hist(score(:,idx), num_bins)
+end
 title (sprintf('histogram of score %d',idx))
 xlabel (sprintf('score %d',idx))
 ylabel('count')
