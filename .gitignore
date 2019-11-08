@@ -1,1 +1,16 @@
 data/
+
+
+ch_*
+
+RF_from_STA_slice_*.pdf
+RF_from_STA_slice_*.png
+
+mosaic.pdf
+mosaic.png
+
+STA_in_ROI_*.pdf
+STA_in_ROI_*.png
+STC_in_ROI_*.pdf
+STC_in_ROI_*.png
+
