@@ -81,16 +81,18 @@ saveas(gcf, sprintf('%s_score.png', channel_name))
 FIGURE_W = 6;
 FIGURE_H = 4.5;
 
-XLIM_MAX = ceil(max(max(abs(score(:,[1 2 r-1 r])))));
-XLIM = XLIM_MAX * [-1 1];
-
 if nargin<2
     hist_num_bins = 30;      % default value
 end
 
+X_MAX = ceil(max(max(abs(score(:,[1 2 r-1 r]))))*2)/2;
+hist_bins = linspace(-X_MAX, X_MAX, hist_num_bins);
+XLIM = X_MAX*[-1 1];
+
+
 figure
 idx=1
-plot_score_histogram(score, idx, XLIM, hist_num_bins);
+plot_score_histogram(score, idx, hist_bins, XLIM);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -98,7 +100,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = 2
-plot_score_histogram(score, idx, XLIM, hist_num_bins);
+plot_score_histogram(score, idx, hist_bins, XLIM);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -106,7 +108,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = r-1
-plot_score_histogram(score, idx, XLIM, hist_num_bins);
+plot_score_histogram(score, idx, hist_bins, XLIM);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -114,7 +116,7 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 
 figure
 idx = r
-plot_score_histogram(score, r, XLIM, hist_num_bins);
+plot_score_histogram(score, r, hist_bins, XLIM);
 set(gcf, 'paperposition', [0 0 FIGURE_W FIGURE_H])
 set(gcf, 'papersize', [FIGURE_W FIGURE_H])
 saveas(gcf, sprintf('%s_score_hist_%d.pdf', channel_name, idx))
@@ -124,30 +126,32 @@ saveas(gcf, sprintf('%s_score_hist_%d.png', channel_name, idx))
 return
 
 
-function XLIM = plot_score_histogram(score, idx, XLIM, num_bins)
+function XLIM = plot_score_histogram(score, idx, bins, XLIM)
 
-if nargin<4
+if nargin<3
     hist(score(:,idx))
 else
-    hist(score(:,idx), num_bins)
+    % use the provided bins
+    hist(score(:,idx), bins)
 end
 title (sprintf('histogram of score %d',idx))
 xlabel (sprintf('score %d',idx))
 ylabel('count')
 box off
 
+
 % set XLIM, if needed
-if nargin>2
+if nargin>3
     set(gca, 'xlim', XLIM);
-else
-    % set symmetric limits
-    XLIM = get(gca, 'xlim');
-    XLIM_MAX = max(XLIM);
-    set(gca, 'xlim', XLIM_MAX*[-1 1]);
+% else
+%     % set symmetric limits
+%     XLIM = get(gca, 'xlim');
+%     XLIM_MAX = max(XLIM);
+%     set(gca, 'xlim', XLIM_MAX*[-1 1]);
 end
 
-% % return XLIM
-% XLIM = get(gca, 'xlim');
+% return XLIM
+XLIM = get(gca, 'xlim');
 
 
 return
